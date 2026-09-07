@@ -36,6 +36,9 @@ button { cursor: pointer; }
 .checkbox-group { display: grid; gap: 10px; margin: 18px 0; }
 .checkbox-label { display: flex; align-items: center; gap: 9px; color: #374151; font-size: 14px; }
 .checkbox-label input { accent-color: #2563eb; width: 16px; height: 16px; }
+.combination-option { border: 1px solid #f59e0b; border-radius: 8px; background: #fef3c7; padding: 9px 10px; }
+.combination-option .checkbox-label { color: #92400e; }
+.option-badge, .combination-badge { border-radius: 999px; background: #f59e0b; color: #fff; padding: 2px 6px; font-size: 10px; font-weight: 700; }
 
 .button-stack { display: grid; gap: 10px; margin-top: 24px; }
 .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -78,6 +81,10 @@ button { cursor: pointer; }
 .results-list li.is-selected { background: #eff6ff; }
 .result-row { display: flex; align-items: center; gap: 10px; padding: 12px 4px; cursor: pointer; }
 .result-checkbox { width: 16px; height: 16px; margin: 0; accent-color: #2563eb; }
+.result-checkbox:disabled { cursor: default; opacity: .65; }
+.results-list li.is-combination { background: #fef3c7; }
+.results-list li.is-combination .result-row { color: #92400e; font-weight: 700; }
+.combination-badge { margin-left: auto; }
 .empty-state { margin-top: 24px; color: #6b7280; text-align: center; }
 .entry-count { align-self: flex-end; margin: 0; padding: 15px 24px 18px; color: #6b7280; font-size: 13px; }
 

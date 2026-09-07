@@ -2,16 +2,17 @@ import { useMemo, useState } from 'react'
 
 export function sortWords(words, sortMode) {
   const sorted = [...words]
+  const text = (entry) => (typeof entry === 'string' ? entry : entry.word)
 
   switch (sortMode) {
     case 'length_asc':
-      return sorted.sort((a, b) => a.length - b.length)
+      return sorted.sort((a, b) => text(a).length - text(b).length)
     case 'length_desc':
-      return sorted.sort((a, b) => b.length - a.length)
+      return sorted.sort((a, b) => text(b).length - text(a).length)
     case 'alpha_asc':
-      return sorted.sort((a, b) => a.localeCompare(b, 'de', { sensitivity: 'base' }))
+      return sorted.sort((a, b) => text(a).localeCompare(text(b), 'de', { sensitivity: 'base' }))
     case 'alpha_desc':
-      return sorted.sort((a, b) => b.localeCompare(a, 'de', { sensitivity: 'base' }))
+      return sorted.sort((a, b) => text(b).localeCompare(text(a), 'de', { sensitivity: 'base' }))
     case 'newest':
       return sorted.reverse()
     case 'oldest':
@@ -48,16 +49,18 @@ export default function RightPanel({ results, hasSearchTerm, selectedWords, onSe
       <div className="results-list" aria-live="polite">
         {sortedResults.length ? (
           <ul>
-            {sortedResults.map((word, index) => (
-              <li key={`${word}-${index}`} className={selectedWords.includes(word) ? 'is-selected' : undefined}>
+            {sortedResults.map((result, index) => (
+              <li key={`${result.word}-${index}`} className={`${selectedWords.includes(result.word) ? 'is-selected' : ''} ${result.isCombination ? 'is-combination' : ''}`}>
                 <label className="result-row">
                   <input
                     className="result-checkbox"
                     type="checkbox"
-                    checked={selectedWords.includes(word)}
-                    onChange={() => toggleWordSelection(word)}
+                    checked={selectedWords.includes(result.word)}
+                    disabled={result.isCombination}
+                    onChange={() => toggleWordSelection(result.word)}
                   />
-                  <span>{word}</span>
+                  <span>{result.word}</span>
+                  {result.isCombination && <span className="combination-badge">Kombination</span>}
                 </label>
               </li>
             ))}

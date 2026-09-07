@@ -18,7 +18,7 @@ export default function App() {
       return DEFAULT_WORD_LIST
     }
   })
-  const [settings, setSettings] = useState({ perfectRhymes: false, additionalWords: false, treatErAsA: false })
+  const [settings, setSettings] = useState({ vowelTolerance: false, additionalWords: false, treatErAsA: false, treatIAsIe: false, normalizeAnglicisms: false })
   const [selectedWords, setSelectedWords] = useState([])
   const [leftPanelHeight, setLeftPanelHeight] = useState(null)
   const leftPanelRef = useRef(null)
@@ -43,13 +43,13 @@ export default function App() {
       language,
       wordList,
       treatErAsA: settings.treatErAsA,
+      vowelTolerance: settings.vowelTolerance,
+      treatIAsIe: settings.treatIAsIe,
+      normalizeAnglicisms: settings.normalizeAnglicisms,
+      includeCombinations: settings.additionalWords,
     }),
-    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA],
+    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA, settings.vowelTolerance, settings.treatIAsIe, settings.normalizeAnglicisms, settings.additionalWords],
   )
-
-  useEffect(() => {
-    setSelectedWords((current) => current.filter((word) => results.includes(word)))
-  }, [results])
 
   useLayoutEffect(() => {
     const panel = leftPanelRef.current
@@ -80,8 +80,8 @@ export default function App() {
           onClearList={() => setWordList([])}
           existingWords={wordList}
           selectedWords={selectedWords}
-          onDeleteSelection={(words) => {
-            setWordList((current) => current.filter((word) => !words.includes(word)))
+          onApplySelection={(words) => {
+            setSearchTerm(words.join(' '))
             setSelectedWords([])
           }}
         />

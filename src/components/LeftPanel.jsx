@@ -116,16 +116,27 @@ export default function LeftPanel({
       {language === 'de' && (
         <div className="checkbox-group">
           <label className="checkbox-label">
-            <input type="checkbox" checked={settings.perfectRhymes} onChange={(e) => onSettingChange('perfectRhymes', e.target.checked)} />
-            Perfekte Reime
+            <input type="checkbox" checked={settings.vowelTolerance} onChange={(e) => onSettingChange('vowelTolerance', e.target.checked)} />
+            Vokal-Toleranz (e=i=ä, u=o)
           </label>
-          <label className="checkbox-label">
-            <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
-            Zusätzliche Wörter
-          </label>
+          <div className="combination-option">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
+              <strong>Zusätzliche Wörter (Wort-Kombinationen)</strong>
+              <span className="option-badge">Neu</span>
+            </label>
+          </div>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatErAsA} onChange={(e) => onSettingChange('treatErAsA', e.target.checked)} />
             "er"-Endung als "a" Vokal behandeln
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.treatIAsIe} onChange={(e) => onSettingChange('treatIAsIe', e.target.checked)} />
+            i = ie gleichbehandeln
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.normalizeAnglicisms} onChange={(e) => onSettingChange('normalizeAnglicisms', e.target.checked)} />
+            Englische Aussprache (Anglizismen) anpassen
           </label>
         </div>
       )}
@@ -162,9 +173,9 @@ export default function LeftPanel({
             className="button button-outline"
             type="button"
             disabled={selectedWords.length === 0}
-            onClick={() => onDeleteSelection(selectedWords)}
+            onClick={() => onApplySelection(selectedWords)}
           >
-            Auswahl löschen
+            Auswahl als Input übernehmen
           </button>
         </div>
       </div>
