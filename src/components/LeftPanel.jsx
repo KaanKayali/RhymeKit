@@ -109,9 +109,9 @@ export default function LeftPanel({
 
       <label className="field-label" htmlFor="rhyme-mode">Reimmodus</label>
       <select id="rhyme-mode" value={rhymeType} onChange={(event) => onRhymeTypeChange(event.target.value)}>
-        <option value="vowel">Vowel rhyme</option>
-        <option value="perfect">Perfekter Endreim</option>
-        <option value="end">Assonanz</option>
+        <option value="vowel">Vokalreim</option>
+        <option value="consonant">Konsonantenreim / Endung</option>
+        <option value="vowel_ending">Vokalreim + Endung</option>
       </select>
 
       <label className="field-label" htmlFor="language">Sprache</label>

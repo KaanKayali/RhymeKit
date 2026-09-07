@@ -7,7 +7,7 @@ import { DEFAULT_WORD_LIST, findRhymes } from './utils/rhymeEngine'
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [rhymeType, setRhymeType] = useState('perfect')
+  const [rhymeType, setRhymeType] = useState('vowel')
   const [language, setLanguage] = useState('de')
   const [wordList, setWordList] = useState(DEFAULT_WORD_LIST)
   const [settings, setSettings] = useState({ perfectRhymes: true, additionalWords: true })
@@ -35,7 +35,7 @@ export default function App() {
           onClearList={() => setWordList([])}
           existingWords={wordList}
         />
-        <RightPanel results={results} />
+        <RightPanel results={results} hasSearchTerm={Boolean(searchTerm.trim())} />
       </div>
     </main>
   )

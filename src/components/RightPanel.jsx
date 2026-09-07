@@ -1,4 +1,4 @@
-export default function RightPanel({ results }) {
+export default function RightPanel({ results, hasSearchTerm }) {
   return (
     <section className="panel results-panel" aria-label="Reim-Ergebnisse">
       <div className="results-heading">
@@ -8,7 +8,7 @@ export default function RightPanel({ results }) {
         {results.length ? (
           <ul>{results.map((word) => <li key={word}>{word}</li>)}</ul>
         ) : (
-          <p className="empty-state">Keine passenden Einträge gefunden.</p>
+          <p className="empty-state">{hasSearchTerm ? 'Keine passenden Einträge gefunden.' : 'Deine Treffer erscheinen hier.'}</p>
         )}
       </div>
       <p className="entry-count">Anzahl Einträge: {results.length}</p>
