@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
 import LeftPanel from './components/LeftPanel'
 import RightPanel from './components/RightPanel'
@@ -18,7 +18,10 @@ export default function App() {
       return DEFAULT_WORD_LIST
     }
   })
-  const [settings, setSettings] = useState({ perfectRhymes: true, additionalWords: true })
+  const [settings, setSettings] = useState({ perfectRhymes: false, additionalWords: false, treatErAsA: false })
+  const [selectedWords, setSelectedWords] = useState([])
+  const [leftPanelHeight, setLeftPanelHeight] = useState(null)
+  const leftPanelRef = useRef(null)
   const debouncedSearchTerm = useVowelDebounce(searchTerm)
 
   useEffect(() => {
@@ -34,15 +37,37 @@ export default function App() {
   }, [wordList])
 
   const results = useMemo(
-    () => findRhymes({ searchTerm: debouncedSearchTerm, rhymeType, language, wordList }),
-    [debouncedSearchTerm, rhymeType, language, wordList],
+    () => findRhymes({
+      searchTerm: debouncedSearchTerm,
+      rhymeType,
+      language,
+      wordList,
+      treatErAsA: settings.treatErAsA,
+    }),
+    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA],
   )
+
+  useEffect(() => {
+    setSelectedWords((current) => current.filter((word) => results.includes(word)))
+  }, [results])
+
+  useLayoutEffect(() => {
+    const panel = leftPanelRef.current
+    if (!panel) return undefined
+
+    const updateHeight = () => setLeftPanelHeight(Math.ceil(panel.getBoundingClientRect().height))
+    updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(panel)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <main className="app-shell">
       <Header />
       <div className="workspace">
         <LeftPanel
+          panelRef={leftPanelRef}
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
           rhymeType={rhymeType}
@@ -54,8 +79,19 @@ export default function App() {
           onAddWords={(words) => setWordList((current) => [...current, ...words])}
           onClearList={() => setWordList([])}
           existingWords={wordList}
+          selectedWords={selectedWords}
+          onDeleteSelection={(words) => {
+            setWordList((current) => current.filter((word) => !words.includes(word)))
+            setSelectedWords([])
+          }}
         />
-        <RightPanel results={results} hasSearchTerm={Boolean(searchTerm.trim())} />
+        <RightPanel
+          results={results}
+          hasSearchTerm={Boolean(searchTerm.trim())}
+          selectedWords={selectedWords}
+          onSelectedWordsChange={setSelectedWords}
+          panelHeight={leftPanelHeight}
+        />
       </div>
     </main>
   )

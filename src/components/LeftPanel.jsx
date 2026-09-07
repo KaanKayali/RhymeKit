@@ -6,6 +6,7 @@ import { prepareImport } from '../utils/importParser'
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
 export default function LeftPanel({
+  panelRef,
   searchTerm,
   onSearchTermChange,
   rhymeType,
@@ -17,6 +18,8 @@ export default function LeftPanel({
   onAddWords,
   onClearList,
   existingWords,
+  selectedWords,
+  onDeleteSelection,
 }) {
   const fileInputRef = useRef(null)
   const [fileMessage, setFileMessage] = useState('')
@@ -97,7 +100,7 @@ export default function LeftPanel({
   }
 
   return (
-    <section className="panel controls-panel" aria-label="Reim-Einstellungen">
+    <section ref={panelRef} className="panel controls-panel" aria-label="Reim-Einstellungen">
       <label className="field-label" htmlFor="search-word">Suchwort</label>
       <input
         id="search-word"
@@ -110,16 +113,22 @@ export default function LeftPanel({
       />
       <p className="search-hint">Gib ein Suchwort ein, um Reime zu finden.</p>
 
-      <div className="checkbox-group">
-        <label className="checkbox-label">
-          <input type="checkbox" checked={settings.perfectRhymes} onChange={(e) => onSettingChange('perfectRhymes', e.target.checked)} />
-          Perfekte Reime
-        </label>
-        <label className="checkbox-label">
-          <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
-          Zusätzliche Wörter
-        </label>
-      </div>
+      {language === 'de' && (
+        <div className="checkbox-group">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.perfectRhymes} onChange={(e) => onSettingChange('perfectRhymes', e.target.checked)} />
+            Perfekte Reime
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
+            Zusätzliche Wörter
+          </label>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.treatErAsA} onChange={(e) => onSettingChange('treatErAsA', e.target.checked)} />
+            "er"-Endung als "a" Vokal behandeln
+          </label>
+        </div>
+      )}
 
       <label className="field-label" htmlFor="rhyme-mode">Reimmodus</label>
       <select id="rhyme-mode" value={rhymeType} onChange={(event) => onRhymeTypeChange(event.target.value)}>
@@ -139,15 +148,25 @@ export default function LeftPanel({
         <button className="button button-primary" type="button" onClick={() => fileInputRef.current?.click()}>
           Liste hinzufügen (txt/PDF)
         </button>
-        <button
-          className="button button-outline"
-          type="button"
-          disabled={existingWords.length === 0}
-          title={existingWords.length === 0 ? 'Die Wortliste ist bereits leer.' : undefined}
-          onClick={() => setShowDeleteConfirmation(true)}
-        >
-          Liste löschen
-        </button>
+        <div className="button-row">
+          <button
+            className="button button-outline"
+            type="button"
+            disabled={existingWords.length === 0}
+            title={existingWords.length === 0 ? 'Die Wortliste ist bereits leer.' : undefined}
+            onClick={() => setShowDeleteConfirmation(true)}
+          >
+            Liste löschen
+          </button>
+          <button
+            className="button button-outline"
+            type="button"
+            disabled={selectedWords.length === 0}
+            onClick={() => onDeleteSelection(selectedWords)}
+          >
+            Auswahl löschen
+          </button>
+        </div>
       </div>
       {fileMessage && <p className="file-message" role="status">{fileMessage}</p>}
 
@@ -164,7 +183,6 @@ export default function LeftPanel({
                 autoFocus
                 onClick={() => {
                   onClearList()
-                  setFileMessage('Wortliste gelöscht.')
                   setShowDeleteConfirmation(false)
                 }}
               >

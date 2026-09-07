@@ -22,12 +22,18 @@ export function sortWords(words, sortMode) {
   }
 }
 
-export default function RightPanel({ results, hasSearchTerm }) {
+export default function RightPanel({ results, hasSearchTerm, selectedWords, onSelectedWordsChange, panelHeight }) {
   const [sortMode, setSortMode] = useState('newest')
   const sortedResults = useMemo(() => sortWords(results, sortMode), [results, sortMode])
 
+  const toggleWordSelection = (word) => {
+    onSelectedWordsChange((current) => (
+      current.includes(word) ? current.filter((selectedWord) => selectedWord !== word) : [...current, word]
+    ))
+  }
+
   return (
-    <section className="panel results-panel" aria-label="Reim-Ergebnisse">
+    <section className="panel results-panel" aria-label="Reim-Ergebnisse" style={panelHeight ? { height: `${panelHeight}px` } : undefined}>
       <div className="results-heading">
         <h2>Passende Reime</h2>
         <select className="sort-select" id="result-sort" value={sortMode} onChange={(event) => setSortMode(event.target.value)} aria-label="Ergebnisse sortieren">
@@ -41,7 +47,21 @@ export default function RightPanel({ results, hasSearchTerm }) {
       </div>
       <div className="results-list" aria-live="polite">
         {sortedResults.length ? (
-          <ul>{sortedResults.map((word, index) => <li key={`${word}-${index}`}>{word}</li>)}</ul>
+          <ul>
+            {sortedResults.map((word, index) => (
+              <li key={`${word}-${index}`} className={selectedWords.includes(word) ? 'is-selected' : undefined}>
+                <label className="result-row">
+                  <input
+                    className="result-checkbox"
+                    type="checkbox"
+                    checked={selectedWords.includes(word)}
+                    onChange={() => toggleWordSelection(word)}
+                  />
+                  <span>{word}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
         ) : (
           <p className="empty-state">{hasSearchTerm ? 'Keine passenden Einträge gefunden.' : 'Deine Wortliste ist noch leer.'}</p>
         )}
