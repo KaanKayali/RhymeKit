@@ -119,25 +119,25 @@ export default function LeftPanel({
             <input type="checkbox" checked={settings.vowelTolerance} onChange={(e) => onSettingChange('vowelTolerance', e.target.checked)} />
             Vokal-Toleranz (e=i=ä, u=o)
           </label>
-          <div className="combination-option">
-            <label className="checkbox-label">
-              <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
-              <strong>Zusätzliche Wörter (Wort-Kombinationen)</strong>
-              <span className="option-badge">Neu</span>
-            </label>
-          </div>
+          <label className="checkbox-label">
+            <input type="checkbox" checked={settings.treatIAsIe} onChange={(e) => onSettingChange('treatIAsIe', e.target.checked)} />
+            "i" = "ie" gleichbehandeln
+          </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatErAsA} onChange={(e) => onSettingChange('treatErAsA', e.target.checked)} />
             "er"-Endung als "a" Vokal behandeln
           </label>
           <label className="checkbox-label">
-            <input type="checkbox" checked={settings.treatIAsIe} onChange={(e) => onSettingChange('treatIAsIe', e.target.checked)} />
-            i = ie gleichbehandeln
-          </label>
-          <label className="checkbox-label">
             <input type="checkbox" checked={settings.normalizeAnglicisms} onChange={(e) => onSettingChange('normalizeAnglicisms', e.target.checked)} />
             Englische Aussprache (Anglizismen) anpassen
           </label>
+          <div className="combination-option">
+            <label className="checkbox-label">
+              <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
+              <strong>Wort-Kombinationen</strong>
+              <span className="option-badge">Neu</span>
+            </label>
+          </div>
         </div>
       )}
 
@@ -172,10 +172,11 @@ export default function LeftPanel({
           <button
             className="button button-outline"
             type="button"
-            disabled={selectedWords.length === 0}
-            onClick={() => onApplySelection(selectedWords)}
+            disabled={selectedWords.length === 0 || settings.additionalWords}
+            title={settings.additionalWords ? 'Die Auswahl kann während der Wort-Kombinationssuche nicht gelöscht werden.' : undefined}
+            onClick={() => onDeleteSelection(selectedWords)}
           >
-            Auswahl als Input übernehmen
+            Auswahl löschen
           </button>
         </div>
       </div>

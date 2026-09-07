@@ -80,8 +80,8 @@ export default function App() {
           onClearList={() => setWordList([])}
           existingWords={wordList}
           selectedWords={selectedWords}
-          onApplySelection={(words) => {
-            setSearchTerm(words.join(' '))
+          onDeleteSelection={(words) => {
+            setWordList((current) => current.filter((word) => !words.includes(word)))
             setSelectedWords([])
           }}
         />
