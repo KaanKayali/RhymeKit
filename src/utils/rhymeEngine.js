@@ -28,39 +28,60 @@ export function extractEndingFromLastVowel(word) {
  * original dictionary entry is returned for display in the UI.
  */
 export function findRhymes({ searchTerm, rhymeType, language, wordList }) {
-  if (!searchTerm || !wordList) return []
+  if (!wordList) return []
 
-  const cleanInput = searchTerm.trim().toLowerCase()
-  if (!cleanInput) return []
+  const uniqueWordList = []
+  const seenEntries = new Set()
+  for (const entry of wordList) {
+    const cleanEntry = String(entry || '').trim().toLowerCase()
+    if (cleanEntry && !seenEntries.has(cleanEntry)) {
+      seenEntries.add(cleanEntry)
+      uniqueWordList.push(entry)
+    }
+  }
 
-  const inputVowels = extractVowelSequence(cleanInput).join('-')
+  const cleanInput = String(searchTerm || '').trim().toLowerCase()
+  // With no active search, show every unique loaded entry unchanged.
+  if (!cleanInput) return uniqueWordList
+
+  const inputVowels = extractVowelSequence(cleanInput)
+  const inputVowelKey = inputVowels.join('-')
   const inputEnding = extractEndingFromLastVowel(cleanInput)
 
   // Reserved for future language-specific phoneme rules.
   void language
 
-  return wordList.filter((entry) => {
+  return uniqueWordList.filter((entry) => {
     const cleanEntry = String(entry || '').trim().toLowerCase()
 
     // Never display the searched word itself, even if its capitalization differs.
     if (!cleanEntry || cleanEntry === cleanInput) return false
 
-    const entryVowels = extractVowelSequence(cleanEntry).join('-')
+    const entryVowels = extractVowelSequence(cleanEntry)
+    const entryVowelKey = entryVowels.join('-')
     const entryEnding = extractEndingFromLastVowel(cleanEntry)
 
     switch (rhymeType) {
       case 'vowel':
-        return inputVowels.length > 0 && inputVowels === entryVowels
+        return inputVowelKey.length > 0 && inputVowelKey === entryVowelKey
 
       case 'consonant':
         return inputEnding.length > 0 && inputEnding === entryEnding
 
       case 'vowel_ending':
         return (
-          inputVowels.length > 0 &&
-          inputVowels === entryVowels &&
+          inputVowelKey.length > 0 &&
+          inputVowelKey === entryVowelKey &&
           inputEnding.length > 0 &&
           inputEnding === entryEnding
+        )
+
+      case 'frame_vowel':
+        return (
+          inputVowels.length > 0 &&
+          entryVowels.length > 0 &&
+          inputVowels[0] === entryVowels[0] &&
+          inputVowels.at(-1) === entryVowels.at(-1)
         )
 
       default:

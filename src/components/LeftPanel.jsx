@@ -38,7 +38,7 @@ export default function LeftPanel({
     reader.readAsText(file)
   })
 
-  const readPdfFile = async (file, setProgress) => {
+  const readPdfFile = async (file, onPageProgress) => {
     const fileBuffer = await file.arrayBuffer()
     const pdf = await getDocument({ data: new Uint8Array(fileBuffer) }).promise
     const pages = []
@@ -47,31 +47,45 @@ export default function LeftPanel({
       const page = await pdf.getPage(pageNumber)
       const content = await page.getTextContent()
       pages.push(content.items.map((item) => item.str).join(' '))
-      setProgress(Math.round(20 + (pageNumber / pdf.numPages) * 45))
+      onPageProgress(pageNumber / pdf.numPages)
     }
 
     return pages.join('\n')
   }
 
   const handleFile = async (event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const files = [...(event.target.files || [])]
+    if (!files.length) return
     event.target.value = ''
 
     const updateProgress = (progressPercent, status) => setImportState((current) => ({ ...current, progressPercent, status }))
     setFileMessage('')
-    setImportState({ phase: 'loading', progressPercent: 5, status: 'Datei wird gelesen …' })
+    setImportState({ phase: 'loading', progressPercent: 0, status: 'Dateien werden vorbereitet …' })
 
     try {
-      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-      const rawText = isPdf
-        ? await readPdfFile(file, (progressPercent) => updateProgress(progressPercent, 'PDF-Text wird extrahiert …'))
-        : await readTextFile(file)
+      const rawTexts = []
+
+      for (const [index, file] of files.entries()) {
+        const fileStart = Math.round((index / files.length) * 70)
+        const fileEnd = Math.round(((index + 1) / files.length) * 70)
+        updateProgress(fileStart, `Datei ${index + 1} von ${files.length} wird gelesen …`)
+
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+        const rawText = isPdf
+          ? await readPdfFile(file, (pageFraction) => updateProgress(
+            Math.round(fileStart + (fileEnd - fileStart) * pageFraction),
+            `PDF ${index + 1} von ${files.length} wird extrahiert …`,
+          ))
+          : await readTextFile(file)
+
+        rawTexts.push(rawText)
+        updateProgress(fileEnd, `Datei ${index + 1} von ${files.length} verarbeitet …`)
+      }
 
       updateProgress(72, 'Phrasen werden extrahiert …')
       await new Promise((resolve) => window.setTimeout(resolve, 120))
       updateProgress(87, 'Einträge werden auf Duplikate geprüft …')
-      const result = prepareImport(rawText, existingWords)
+      const result = prepareImport(rawTexts.join('\n'), existingWords)
       onAddWords(result.entriesToAdd)
       setImportState({ phase: 'summary', progressPercent: 100, ...result })
     } catch (error) {
@@ -112,6 +126,7 @@ export default function LeftPanel({
         <option value="vowel">Vokalreim</option>
         <option value="consonant">Konsonantenreim / Endung</option>
         <option value="vowel_ending">Vokalreim + Endung</option>
+        <option value="frame_vowel">Rahmen-Vokalreim (Erster &amp; Letzter Vokal)</option>
       </select>
 
       <label className="field-label" htmlFor="language">Sprache</label>
@@ -119,7 +134,7 @@ export default function LeftPanel({
         <option value="de">Deutsch</option>
       </select>
 
-      <input ref={fileInputRef} className="visually-hidden" type="file" accept=".txt,.pdf,text/plain,application/pdf" onChange={handleFile} />
+      <input ref={fileInputRef} className="visually-hidden" type="file" multiple accept=".txt,.pdf,text/plain,application/pdf" onChange={handleFile} />
       <div className="button-stack">
         <button className="button button-primary" type="button" onClick={() => fileInputRef.current?.click()}>
           Liste hinzufügen (txt/PDF)
@@ -127,6 +142,8 @@ export default function LeftPanel({
         <button
           className="button button-outline"
           type="button"
+          disabled={existingWords.length === 0}
+          title={existingWords.length === 0 ? 'Die Wortliste ist bereits leer.' : undefined}
           onClick={() => setShowDeleteConfirmation(true)}
         >
           Liste löschen
@@ -137,8 +154,8 @@ export default function LeftPanel({
       {showDeleteConfirmation && (
         <div className="modal-backdrop" role="presentation">
           <section className="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-list-title" aria-describedby="delete-list-description">
-            <h2 id="delete-list-title">Liste löschen?</h2>
-            <p id="delete-list-description">Möchtest du die gesamte Wortliste wirklich löschen? Dieser Schritt kann nicht rückgängig gemacht werden.</p>
+            <h2 id="delete-list-title">Liste wirklich löschen?</h2>
+            <p id="delete-list-description">Du bist dabei, {existingWords.length} Wörter aus deiner Liste zu löschen. Dieser Vorgang kann nicht rückgängig gemacht werden.</p>
             <div className="modal-actions">
               <button className="button button-outline" type="button" onClick={() => setShowDeleteConfirmation(false)}>Abbrechen</button>
               <button
@@ -151,7 +168,7 @@ export default function LeftPanel({
                   setShowDeleteConfirmation(false)
                 }}
               >
-                Liste löschen
+                Löschen
               </button>
             </div>
           </section>
@@ -174,8 +191,8 @@ export default function LeftPanel({
               <h2 id="import-result-title">{importState.phase === 'summary' ? 'Import Successful' : 'Import fehlgeschlagen'}</h2>
               {importState.phase === 'summary' ? (
                 <div className="import-metrics">
-                  <p><strong>{importState.addedCount}</strong> neue Einträge hinzugefügt.</p>
-                  <p><strong>{importState.skippedDuplicatesCount}</strong> doppelte Einträge übersprungen.</p>
+                  <p><strong>{importState.addedCount}</strong> neue Einträge insgesamt hinzugefügt.</p>
+                  <p><strong>{importState.skippedDuplicatesCount}</strong> Duplikate insgesamt übersprungen.</p>
                 </div>
               ) : <p>{importState.message}</p>}
               <div className="modal-actions">
