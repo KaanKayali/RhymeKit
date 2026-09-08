@@ -190,16 +190,6 @@ export default function LeftPanel({
         >
           Liste hinzufügen (txt/PDF)
         </button>
-        {selectedWords.length > 0 && (
-          <button
-            className="button button-outline"
-            type="button"
-            title="Überträgt das aktuell in der Liste ausgewählte Wort direkt in das Suchfeld."
-            onClick={() => onSearchTermChange(selectedWords[0])}
-          >
-            Auswahl als Input übernehmen
-          </button>
-        )}
         <div className="button-row">
           <button
             className="button button-outline"
