@@ -3,12 +3,16 @@ import Header from './components/Header'
 import LeftPanel from './components/LeftPanel'
 import RightPanel from './components/RightPanel'
 import { useVowelDebounce } from './hooks/useVowelDebounce'
+import { loadPreferences, savePreferences } from './utils/preferences'
 import { DEFAULT_WORD_LIST, findRhymes } from './utils/rhymeEngine'
+
+const INITIAL_PREFERENCES = loadPreferences()
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [rhymeType, setRhymeType] = useState('vowel')
-  const [language, setLanguage] = useState('de')
+  const [rhymeType, setRhymeType] = useState(INITIAL_PREFERENCES.rhymeType)
+  const [language, setLanguage] = useState(INITIAL_PREFERENCES.language)
+  const [sortMode, setSortMode] = useState(INITIAL_PREFERENCES.sortMode)
   const [wordList, setWordList] = useState(() => {
     try {
       const savedList = window.localStorage.getItem('rhymekit_word_list')
@@ -18,7 +22,7 @@ export default function App() {
       return DEFAULT_WORD_LIST
     }
   })
-  const [settings, setSettings] = useState({ vowelTolerance: false, additionalWords: false, treatErAsA: false, treatIAsIe: false, normalizeAnglicisms: false })
+  const [settings, setSettings] = useState(INITIAL_PREFERENCES.settings)
   const [selectedWords, setSelectedWords] = useState([])
   const [leftPanelHeight, setLeftPanelHeight] = useState(null)
   const leftPanelRef = useRef(null)
@@ -35,6 +39,10 @@ export default function App() {
       // The app remains usable when browser storage is unavailable.
     }
   }, [wordList])
+
+  useEffect(() => {
+    savePreferences({ rhymeType, language, sortMode, settings })
+  }, [rhymeType, language, sortMode, settings])
 
   const results = useMemo(
     () => findRhymes({
@@ -88,9 +96,12 @@ export default function App() {
         <RightPanel
           results={results}
           hasSearchTerm={Boolean(searchTerm.trim())}
+          hasActiveRhymeSearch={Boolean(debouncedSearchTerm.trim())}
           selectedWords={selectedWords}
           onSelectedWordsChange={setSelectedWords}
           panelHeight={leftPanelHeight}
+          sortMode={sortMode}
+          onSortModeChange={setSortMode}
         />
       </div>
     </main>

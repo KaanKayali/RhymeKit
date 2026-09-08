@@ -1,7 +1,14 @@
 const LETTERS_ONLY = /[^\p{L}]/gu
 const PHRASE_CHARACTERS = /[^\p{L}\s]/gu
+const LETTERS = /\p{L}/gu
+const GERMAN_VOWEL = /[aeiouäöü]/i
 
 const comparisonKey = (entry) => entry.toLocaleLowerCase('de-DE')
+
+export function isImportableWord(entry) {
+  const letters = String(entry || '').match(LETTERS) || []
+  return letters.length > 1 && letters.some((letter) => GERMAN_VOWEL.test(letter))
+}
 
 function cleanPhrase(value) {
   return value.replace(PHRASE_CHARACTERS, '').replace(/\s+/g, ' ').trim()
@@ -34,8 +41,14 @@ export function prepareImport(rawText, existingWordList) {
   const knownEntries = new Set(existingWordList.map(comparisonKey))
   const entriesToAdd = []
   let skippedDuplicatesCount = 0
+  let skippedInvalidCount = 0
 
   for (const entry of extractEntries(rawText)) {
+    if (!isImportableWord(entry)) {
+      skippedInvalidCount += 1
+      continue
+    }
+
     const key = comparisonKey(entry)
     if (knownEntries.has(key)) {
       skippedDuplicatesCount += 1
@@ -50,5 +63,6 @@ export function prepareImport(rawText, existingWordList) {
     entriesToAdd,
     addedCount: entriesToAdd.length,
     skippedDuplicatesCount,
+    skippedInvalidCount,
   }
 }

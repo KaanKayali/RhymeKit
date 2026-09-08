@@ -74,14 +74,18 @@ button { cursor: pointer; }
 .results-panel { display: flex; flex-direction: column; overflow: hidden; }
 .results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #bfdbfe; padding: 14px 24px; }
 .results-heading h2 { margin: 0; color: #1d4ed8; font-size: 19px; }
+.results-heading-actions { display: flex; align-items: center; gap: 8px; }
+.export-button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid #2563eb; border-radius: 6px; background: #fff; color: #1d4ed8; padding: 0; }
+.export-button:hover { background: #eff6ff; }
+.export-button:disabled { cursor: not-allowed; opacity: .5; transform: none; }
+.export-icon { width: 16px; height: 16px; }
 .sort-select { width: auto; min-height: 30px; border-radius: 6px; padding: 4px 8px; font-size: 12px; }
 .results-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 24px; }
 .results-list ul { padding: 0; margin: 0; list-style: none; }
 .results-list li { border-bottom: 1px solid #dbeafe; color: #1f2937; }
 .results-list li.is-selected { background: #eff6ff; }
-.result-row { display: flex; align-items: center; gap: 10px; padding: 12px 4px; cursor: pointer; }
-.result-checkbox { width: 16px; height: 16px; margin: 0; accent-color: #2563eb; }
-.result-checkbox:disabled { cursor: default; opacity: .65; }
+.result-row { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: inherit; text-align: left; padding: 12px 4px; cursor: pointer; }
+.result-row:disabled { cursor: default; }
 .results-list li.is-combination { background: #fef3c7; }
 .results-list li.is-combination .result-row { color: #92400e; font-weight: 700; }
 .combination-badge { margin-left: auto; }
@@ -94,5 +98,6 @@ button { cursor: pointer; }
   .workspace { grid-template-columns: 1fr; }
   .panel { min-height: auto; }
   .results-heading { align-items: flex-start; flex-direction: column; }
-  .sort-select { width: 100%; }
+  .results-heading-actions { width: 100%; }
+  .sort-select { flex: 1; width: auto; }
 }

@@ -223,6 +223,9 @@ export default function LeftPanel({
                 <div className="import-metrics">
                   <p><strong>{importState.addedCount}</strong> neue Einträge insgesamt hinzugefügt.</p>
                   <p><strong>{importState.skippedDuplicatesCount}</strong> Duplikate insgesamt übersprungen.</p>
+                  {importState.skippedInvalidCount > 0 && (
+                    <p><strong>{importState.skippedInvalidCount}</strong> Einträge übersprungen (zu kurz oder ohne Vokal).</p>
+                  )}
                 </div>
               ) : <p>{importState.message}</p>}
               <div className="modal-actions">
