@@ -4,12 +4,80 @@ export const DEFAULT_WORD_LIST = ['Haus', 'Maus', 'Laus', 'Blau', 'Schlau']
 const VOWEL_REGEX = /(au|äu|eu|ei|ai|ie|[aeiouäöü])/gi
 const MAX_COMBINATION_RESULTS = 100
 
-export function extractVowelSequence(word) {
-  return String(word || '').toLowerCase().match(VOWEL_REGEX) || []
+export function extractVowelSequence(word, distinguishVowelLength = false) {
+  if (!word) return []
+
+  let clean = String(word).toLowerCase()
+
+  if (!distinguishVowelLength) {
+    // 1. Collapse double vowels (geminates) and stretching H to single vowel representation
+    clean = clean.replace(/aa/g, 'a')
+    clean = clean.replace(/ee/g, 'e')
+    clean = clean.replace(/oo/g, 'o')
+
+    clean = clean.replace(/ah/g, 'a')
+    clean = clean.replace(/eh/g, 'e')
+    clean = clean.replace(/oh/g, 'o')
+    clean = clean.replace(/uh/g, 'u')
+    clean = clean.replace(/ih/g, 'i')
+
+    // 2. Extract true diphthongs and remaining single vowels in exact order
+    const matches = clean.match(VOWEL_REGEX)
+    return matches ? matches.map((v) => v.toLowerCase()) : []
+  }
+
+  // When distinguishVowelLength is true:
+  const TOKEN_REGEX = /(au|äu|eu|ei|ai|ie|aa|ee|oo|ah|eh|oh|uh|ih|[aeiouäöü])/gi
+  const matches = [...clean.matchAll(TOKEN_REGEX)]
+  if (!matches.length) return []
+
+  const results = []
+  for (const match of matches) {
+    const v = match[0].toLowerCase()
+    const matchIndex = match.index
+
+    if (['ei', 'ai', 'au', 'eu', 'äu', 'ie'].includes(v)) {
+      results.push(v)
+    } else if (['aa', 'ah'].includes(v)) {
+      results.push('a:long')
+    } else if (['ee', 'eh'].includes(v)) {
+      results.push('e:long')
+    } else if (['oo', 'oh'].includes(v)) {
+      results.push('o:long')
+    } else if (v === 'uh') {
+      results.push('u:long')
+    } else if (v === 'ih') {
+      results.push('i:long')
+    } else {
+      const afterVowel = clean.slice(matchIndex + v.length)
+      const consonantMatch = afterVowel.match(/^[bcdfghjklmnpqrstvwxyz]+/i)
+      const consonantCount = consonantMatch ? consonantMatch[0].length : 0
+
+      if (consonantCount >= 2) {
+        results.push(`${v}:short`)
+      } else {
+        results.push(`${v}:long`)
+      }
+    }
+  }
+
+  return results
 }
 
 export function extractEndingFromLastVowel(word) {
-  const cleanWord = String(word || '').toLowerCase()
+  if (!word) return ''
+
+  let cleanWord = String(word).toLowerCase()
+  cleanWord = cleanWord.replace(/aa/g, 'a')
+  cleanWord = cleanWord.replace(/ee/g, 'e')
+  cleanWord = cleanWord.replace(/oo/g, 'o')
+
+  cleanWord = cleanWord.replace(/ah/g, 'a')
+  cleanWord = cleanWord.replace(/eh/g, 'e')
+  cleanWord = cleanWord.replace(/oh/g, 'o')
+  cleanWord = cleanWord.replace(/uh/g, 'u')
+  cleanWord = cleanWord.replace(/ih/g, 'i')
+
   const vowelMatches = [...cleanWord.matchAll(VOWEL_REGEX)]
   const lastVowel = vowelMatches.at(-1)
   return lastVowel?.index === undefined ? '' : cleanWord.slice(lastVowel.index)
@@ -33,10 +101,13 @@ export function normalizeAnglicismPhonetics(word) {
 
 function normalizeVowels(vowels, vowelTolerance, treatIAsIe) {
   return vowels.map((vowel) => {
+    const [baseVowel, tag] = vowel.split(':')
+    const suffix = tag ? `:${tag}` : ''
+
     // When both options are active, the linked groups form one equivalence set.
-    if (vowelTolerance && (vowel === 'e' || vowel === 'i' || vowel === 'ä' || (treatIAsIe && vowel === 'ie'))) return 'E'
-    if (treatIAsIe && (vowel === 'i' || vowel === 'ie')) return 'I'
-    if (vowelTolerance && (vowel === 'u' || vowel === 'o')) return 'O'
+    if (vowelTolerance && (baseVowel === 'e' || baseVowel === 'i' || baseVowel === 'ä' || (treatIAsIe && baseVowel === 'ie'))) return `E${suffix}`
+    if (treatIAsIe && (baseVowel === 'i' || baseVowel === 'ie')) return `I${suffix}`
+    if (vowelTolerance && (baseVowel === 'u' || baseVowel === 'o')) return `O${suffix}`
     return vowel
   })
 }
@@ -48,9 +119,9 @@ function preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms) {
   return applyGermanErRule(withAnglicismsNormalized, language, treatErAsA)
 }
 
-function vowelKey(word, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms) {
+function vowelKey(word, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength) {
   const phoneticWord = preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms)
-  return normalizeVowels(extractVowelSequence(phoneticWord), vowelTolerance, treatIAsIe)
+  return normalizeVowels(extractVowelSequence(phoneticWord, distinguishVowelLength), vowelTolerance, treatIAsIe)
 }
 
 function toResult(word, isCombination = false) {
@@ -61,7 +132,7 @@ function toResult(word, isCombination = false) {
  * Builds two-word results through indexed vowel partitions, avoiding a scan of
  * every possible pair. Only 100 generated combinations are retained.
  */
-function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms }) {
+function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
   if (targetVowels.length < 2) return []
 
   const wordsByVowelKey = new Map()
@@ -69,7 +140,7 @@ function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treat
     const word = String(entry).trim()
     if (/\s/.test(word)) continue
 
-    const key = vowelKey(word.toLowerCase(), language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms).join('-')
+    const key = vowelKey(word.toLowerCase(), language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength).join('-')
     if (!key) continue
     const matches = wordsByVowelKey.get(key) || []
     matches.push(word)
@@ -112,6 +183,7 @@ export function findRhymes({
   treatIAsIe = false,
   normalizeAnglicisms = false,
   includeCombinations = false,
+  distinguishVowelLength = false,
 }) {
   if (!wordList) return []
 
@@ -129,7 +201,7 @@ export function findRhymes({
   if (!cleanInput) return uniqueWordList.map((entry) => toResult(entry))
 
   const phoneticInput = preparePhoneticWord(cleanInput, language, treatErAsA, normalizeAnglicisms)
-  const inputVowels = normalizeVowels(extractVowelSequence(phoneticInput), vowelTolerance, treatIAsIe)
+  const inputVowels = normalizeVowels(extractVowelSequence(phoneticInput, distinguishVowelLength), vowelTolerance, treatIAsIe)
   const inputVowelKey = inputVowels.join('-')
   const inputEnding = extractEndingFromLastVowel(phoneticInput)
 
@@ -138,7 +210,7 @@ export function findRhymes({
     if (cleanEntry === cleanInput) return false
 
     const phoneticEntry = preparePhoneticWord(cleanEntry, language, treatErAsA, normalizeAnglicisms)
-    const entryVowels = normalizeVowels(extractVowelSequence(phoneticEntry), vowelTolerance, treatIAsIe)
+    const entryVowels = normalizeVowels(extractVowelSequence(phoneticEntry, distinguishVowelLength), vowelTolerance, treatIAsIe)
     const entryVowelKey = entryVowels.join('-')
     const entryEnding = extractEndingFromLastVowel(phoneticEntry)
 
@@ -160,6 +232,6 @@ export function findRhymes({
 
   return [
     ...directMatches,
-    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms }),
+    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }),
   ]
 }

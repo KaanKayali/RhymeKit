@@ -128,6 +128,10 @@ export default function LeftPanel({
             "er"-Endung als "a" Vokal behandeln
           </label>
           <label className="checkbox-label">
+            <input type="checkbox" checked={settings.distinguishVowelLength} onChange={(e) => onSettingChange('distinguishVowelLength', e.target.checked)} />
+            Kurze &amp; lange Vokale unterscheiden
+          </label>
+          <label className="checkbox-label">
             <input type="checkbox" checked={settings.normalizeAnglicisms} onChange={(e) => onSettingChange('normalizeAnglicisms', e.target.checked)} />
             Englische Aussprache (Anglizismen) anpassen
           </label>

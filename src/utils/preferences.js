@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS = {
   treatErAsA: false,
   treatIAsIe: false,
   normalizeAnglicisms: false,
+  distinguishVowelLength: false,
 }
 
 const RHYME_TYPES = new Set(['vowel', 'consonant', 'vowel_ending', 'frame_vowel'])
@@ -44,6 +45,7 @@ export function loadPreferences() {
         treatErAsA: isBoolean(settings.treatErAsA) ? settings.treatErAsA : DEFAULT_SETTINGS.treatErAsA,
         treatIAsIe: isBoolean(settings.treatIAsIe) ? settings.treatIAsIe : DEFAULT_SETTINGS.treatIAsIe,
         normalizeAnglicisms: isBoolean(settings.normalizeAnglicisms) ? settings.normalizeAnglicisms : DEFAULT_SETTINGS.normalizeAnglicisms,
+        distinguishVowelLength: isBoolean(settings.distinguishVowelLength) ? settings.distinguishVowelLength : DEFAULT_SETTINGS.distinguishVowelLength,
       },
     }
   } catch {

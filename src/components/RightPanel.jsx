@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { extractVowelSequence } from '../utils/rhymeEngine'
 
 export function sortWords(words, sortMode) {
   const sorted = [...words]
@@ -38,8 +39,9 @@ function exportWordList(entries) {
 
 export default function RightPanel({
   results,
-  hasSearchTerm,
-  hasActiveRhymeSearch,
+  searchTerm = '',
+  wordListCount,
+  settings,
   selectedWords,
   onSelectedWordsChange,
   panelHeight,
@@ -47,6 +49,17 @@ export default function RightPanel({
   onSortModeChange,
 }) {
   const sortedResults = useMemo(() => sortWords(results, sortMode), [results, sortMode])
+
+  const trimmedTerm = String(searchTerm || '').trim()
+  const hasVowels = useMemo(
+    () => Boolean(trimmedTerm) && extractVowelSequence(trimmedTerm, settings?.distinguishVowelLength).length > 0,
+    [trimmedTerm, settings?.distinguishVowelLength],
+  )
+  const isRhymeSearchActive = trimmedTerm !== '' && hasVowels
+
+  const headerLabel = isRhymeSearchActive
+    ? `Gefundene Reime: ${sortedResults.length}`
+    : `Anzahl Einträge: ${wordListCount ?? sortedResults.length}`
 
   const toggleWordSelection = (word, isCombination) => {
     if (isCombination) return
@@ -103,12 +116,10 @@ export default function RightPanel({
             ))}
           </ul>
         ) : (
-          <p className="empty-state">{hasActiveRhymeSearch ? 'Keine passenden Einträge gefunden.' : 'Deine Wortliste ist noch leer.'}</p>
+          <p className="empty-state">{isRhymeSearchActive ? 'Keine passenden Einträge gefunden.' : 'Deine Wortliste ist noch leer.'}</p>
         )}
       </div>
-      <p className="entry-count">
-        {hasSearchTerm ? `Gefundene Reime: ${sortedResults.length}` : `Anzahl Einträge: ${sortedResults.length}`}
-      </p>
+      <p className="entry-count">{headerLabel}</p>
     </section>
   )
 }

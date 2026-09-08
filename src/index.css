@@ -83,7 +83,8 @@ button { cursor: pointer; }
 .results-list { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 24px; }
 .results-list ul { padding: 0; margin: 0; list-style: none; }
 .results-list li { border-bottom: 1px solid #dbeafe; color: #1f2937; }
-.results-list li.is-selected { background: #eff6ff; }
+.results-list li.is-selected { background: #dbeafe; border-left: 4px solid #2563eb; }
+.results-list li.is-selected .result-row { color: #1e3a8a; font-weight: 700; }
 .result-row { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; color: inherit; text-align: left; padding: 12px 4px; cursor: pointer; }
 .result-row:disabled { cursor: default; }
 .results-list li.is-combination { background: #fef3c7; }

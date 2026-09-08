@@ -55,8 +55,9 @@ export default function App() {
       treatIAsIe: settings.treatIAsIe,
       normalizeAnglicisms: settings.normalizeAnglicisms,
       includeCombinations: settings.additionalWords,
+      distinguishVowelLength: settings.distinguishVowelLength,
     }),
-    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA, settings.vowelTolerance, settings.treatIAsIe, settings.normalizeAnglicisms, settings.additionalWords],
+    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA, settings.vowelTolerance, settings.treatIAsIe, settings.normalizeAnglicisms, settings.additionalWords, settings.distinguishVowelLength],
   )
 
   useLayoutEffect(() => {
@@ -95,8 +96,9 @@ export default function App() {
         />
         <RightPanel
           results={results}
-          hasSearchTerm={Boolean(searchTerm.trim())}
-          hasActiveRhymeSearch={Boolean(debouncedSearchTerm.trim())}
+          searchTerm={searchTerm}
+          wordListCount={wordList.length}
+          settings={settings}
           selectedWords={selectedWords}
           onSelectedWordsChange={setSelectedWords}
           panelHeight={leftPanelHeight}
