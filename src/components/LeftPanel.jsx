@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { prepareImport } from '../utils/importParser'
+import ImportOptionsModal from './ImportOptionsModal'
+import InfoTooltip from './InfoTooltip'
 
 GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
@@ -25,6 +27,7 @@ export default function LeftPanel({
   const [fileMessage, setFileMessage] = useState('')
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const [importState, setImportState] = useState(null)
+  const [pendingFiles, setPendingFiles] = useState(null)
 
   useEffect(() => {
     const closeOnEscape = (event) => {
@@ -56,10 +59,17 @@ export default function LeftPanel({
     return pages.join('\n')
   }
 
-  const handleFile = async (event) => {
+  const handleFileSelect = (event) => {
     const files = [...(event.target.files || [])]
     if (!files.length) return
     event.target.value = ''
+    setPendingFiles(files)
+  }
+
+  const executeImport = async (selectedDelimiters) => {
+    const files = pendingFiles
+    setPendingFiles(null)
+    if (!files || !files.length) return
 
     const updateProgress = (progressPercent, status) => setImportState((current) => ({ ...current, progressPercent, status }))
     setFileMessage('')
@@ -88,7 +98,7 @@ export default function LeftPanel({
       updateProgress(72, 'Phrasen werden extrahiert …')
       await new Promise((resolve) => window.setTimeout(resolve, 120))
       updateProgress(87, 'Einträge werden auf Duplikate geprüft …')
-      const result = prepareImport(rawTexts.join('\n'), existingWords)
+      const result = prepareImport(rawTexts.join('\n'), existingWords, selectedDelimiters)
       onAddWords(result.entriesToAdd)
       setImportState({ phase: 'summary', progressPercent: 100, ...result })
     } catch (error) {
@@ -110,6 +120,7 @@ export default function LeftPanel({
         onChange={(event) => onSearchTermChange(event.target.value)}
         placeholder="Wort eingeben …"
         autoComplete="off"
+        title="Gib ein Wort ein, um passende Reime aus deiner Liste zu finden."
       />
       <p className="search-hint">Gib ein Suchwort ein, um Reime zu finden.</p>
 
@@ -117,36 +128,47 @@ export default function LeftPanel({
         <div className="checkbox-group">
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.vowelTolerance} onChange={(e) => onSettingChange('vowelTolerance', e.target.checked)} />
-            Vokal-Toleranz (e=i=ä, u=o)
+            <span>Vokal-Toleranz (e=i=ä, u=o)</span>
+            <InfoTooltip text="Gleicht ungleiche Vokale an, die phonetisch ähnlich klingen (z. B. 'Wenden', 'Winden', 'Wänden')." />
           </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatIAsIe} onChange={(e) => onSettingChange('treatIAsIe', e.target.checked)} />
-            "i" = "ie" gleichbehandeln
+            <span>"i" = "ie" gleichbehandeln</span>
+            <InfoTooltip text="Behandelt kurzes 'i' und langes 'ie' als identischen Vokal (z. B. 'Lid' = 'Lied')." />
           </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatErAsA} onChange={(e) => onSettingChange('treatErAsA', e.target.checked)} />
-            "er"-Endung als "a" Vokal behandeln
+            <span>"er"-Endung als "a" Vokal behandeln</span>
+            <InfoTooltip text="Behandelt auslautendes '-er' phonetisch als 'a' (z. B. 'Mutter' klingt wie 'Mutta')." />
           </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.distinguishVowelLength} onChange={(e) => onSettingChange('distinguishVowelLength', e.target.checked)} />
-            Kurze &amp; lange Vokale unterscheiden
+            <span>Kurze &amp; lange Vokale unterscheiden</span>
+            <InfoTooltip text="Prüft, ob nach einem Vokal 2+ Konsonanten folgen (kurzer Vokal, z. B. 'Doppel' vs. 'Dose')." />
           </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.normalizeAnglicisms} onChange={(e) => onSettingChange('normalizeAnglicisms', e.target.checked)} />
-            Englische Aussprache (Anglizismen) anpassen
+            <span>Englische Aussprache (Anglizismen) anpassen</span>
+            <InfoTooltip text="Wandelt englische Buchstabenfolgen in deutsche Lautschrift um (z. B. 'Team' -> 'Tiem', 'Speed' -> 'Spied')." />
           </label>
           <div className="combination-option">
             <label className="checkbox-label">
               <input type="checkbox" checked={settings.additionalWords} onChange={(e) => onSettingChange('additionalWords', e.target.checked)} />
               <strong>Wort-Kombinationen</strong>
               <span className="option-badge">Neu</span>
+              <InfoTooltip text="Sucht nach Kombinationen aus 2 oder 3 Wörtern aus deiner Liste, die zusammen den Reim ergeben." />
             </label>
           </div>
         </div>
       )}
 
       <label className="field-label" htmlFor="rhyme-mode">Reimmodus</label>
-      <select id="rhyme-mode" value={rhymeType} onChange={(event) => onRhymeTypeChange(event.target.value)}>
+      <select
+        id="rhyme-mode"
+        value={rhymeType}
+        onChange={(event) => onRhymeTypeChange(event.target.value)}
+        title="Wähle das Reimschema (z. B. Vokalreim, Konsonantenreim oder Rahmen-Vokalreim)."
+      >
         <option value="vowel">Vokalreim</option>
         <option value="consonant">Konsonantenreim / Endung</option>
         <option value="vowel_ending">Vokalreim + Endung</option>
@@ -158,17 +180,32 @@ export default function LeftPanel({
         <option value="de">Deutsch</option>
       </select>
 
-      <input ref={fileInputRef} className="visually-hidden" type="file" multiple accept=".txt,.pdf,text/plain,application/pdf" onChange={handleFile} />
+      <input ref={fileInputRef} className="visually-hidden" type="file" multiple accept=".txt,.pdf,text/plain,application/pdf" onChange={handleFileSelect} />
       <div className="button-stack">
-        <button className="button button-primary" type="button" onClick={() => fileInputRef.current?.click()}>
+        <button
+          className="button button-primary"
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          title="Mehrere .txt oder .pdf Dateien gleichzeitig auswählen und importieren."
+        >
           Liste hinzufügen (txt/PDF)
         </button>
+        {selectedWords.length > 0 && (
+          <button
+            className="button button-outline"
+            type="button"
+            title="Überträgt das aktuell in der Liste ausgewählte Wort direkt in das Suchfeld."
+            onClick={() => onSearchTermChange(selectedWords[0])}
+          >
+            Auswahl als Input übernehmen
+          </button>
+        )}
         <div className="button-row">
           <button
             className="button button-outline"
             type="button"
             disabled={existingWords.length === 0}
-            title={existingWords.length === 0 ? 'Die Wortliste ist bereits leer.' : undefined}
+            title={existingWords.length === 0 ? 'Die Wortliste ist bereits leer.' : 'Löscht die gesamte geladene Wortliste nach Bestätigung (ausgewählte Wörter bleiben erhalten).'}
             onClick={() => setShowDeleteConfirmation(true)}
           >
             Liste löschen
@@ -185,6 +222,13 @@ export default function LeftPanel({
         </div>
       </div>
       {fileMessage && <p className="file-message" role="status">{fileMessage}</p>}
+
+      {pendingFiles && (
+        <ImportOptionsModal
+          onCancel={() => setPendingFiles(null)}
+          onConfirm={executeImport}
+        />
+      )}
 
       {showDeleteConfirmation && (
         <div className="modal-backdrop" role="presentation">

@@ -87,7 +87,14 @@ export default function RightPanel({
               <path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
             </svg>
           </button>
-          <select className="sort-select" id="result-sort" value={sortMode} onChange={(event) => onSortModeChange(event.target.value)} aria-label="Ergebnisse sortieren">
+          <select
+            className="sort-select"
+            id="result-sort"
+            value={sortMode}
+            onChange={(event) => onSortModeChange(event.target.value)}
+            aria-label="Ergebnisse sortieren"
+            title="Ändere die Sortierung der angezeigten Reime (z. B. Neuste zuerst, Kürzeste Wort zuerst)."
+          >
             <option value="newest">Neuste zuerst</option>
             <option value="oldest">Älteste zuerst</option>
             <option value="length_asc">Kürzeste Wort zuerst</option>

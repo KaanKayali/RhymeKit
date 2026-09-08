@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
 import LeftPanel from './components/LeftPanel'
+import LogicExplanationModal from './components/LogicExplanationModal'
 import RightPanel from './components/RightPanel'
 import { useVowelDebounce } from './hooks/useVowelDebounce'
 import { loadPreferences, savePreferences } from './utils/preferences'
@@ -25,6 +26,7 @@ export default function App() {
   const [settings, setSettings] = useState(INITIAL_PREFERENCES.settings)
   const [selectedWords, setSelectedWords] = useState([])
   const [leftPanelHeight, setLeftPanelHeight] = useState(null)
+  const [showExplanationModal, setShowExplanationModal] = useState(false)
   const leftPanelRef = useRef(null)
   const debouncedSearchTerm = useVowelDebounce(searchTerm)
 
@@ -73,7 +75,7 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <Header />
+      <Header onOpenExplanation={() => setShowExplanationModal(true)} />
       <div className="workspace">
         <LeftPanel
           panelRef={leftPanelRef}
@@ -106,6 +108,10 @@ export default function App() {
           onSortModeChange={setSortMode}
         />
       </div>
+
+      {showExplanationModal && (
+        <LogicExplanationModal onClose={() => setShowExplanationModal(false)} />
+      )}
     </main>
   )
 }
