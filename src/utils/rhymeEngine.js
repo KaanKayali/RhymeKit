@@ -8,6 +8,7 @@ export function extractVowelSequence(word, distinguishVowelLength = false) {
   if (!word) return []
 
   let clean = String(word).toLowerCase()
+  clean = clean.replace(/äu/g, 'eu')
 
   if (!distinguishVowelLength) {
     // 1. Collapse double vowels (geminates) and stretching H to single vowel representation
@@ -68,6 +69,7 @@ export function extractEndingFromLastVowel(word) {
   if (!word) return ''
 
   let cleanWord = String(word).toLowerCase()
+  cleanWord = cleanWord.replace(/äu/g, 'eu')
   cleanWord = cleanWord.replace(/aa/g, 'a')
   cleanWord = cleanWord.replace(/ee/g, 'e')
   cleanWord = cleanWord.replace(/oo/g, 'o')

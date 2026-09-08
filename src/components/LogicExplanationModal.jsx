@@ -40,13 +40,14 @@ export default function LogicExplanationModal({ onClose }) {
           <section className="explanation-section">
             <h3>2. Doppelvokale &amp; Dehnungs-H vs. Diphthonge</h3>
             <p>
-              Geschriebene Doppelvokale (<code>aa</code>, <code>ee</code>, <code>oo</code>) sowie Vokale mit Dehnungs-H (<code>ah</code>, <code>eh</code>, <code>oh</code>, <code>uh</code>, <code>ih</code>) werden phonetisch zu einfachen Langvokalen zusammengefasst. Echte Diphthonge (<code>ei</code>, <code>ai</code>, <code>au</code>, <code>eu</code>, <code>äu</code>, <code>ie</code>) bleiben als eigenständige Doppellaut-Einheiten erhalten.
+              Geschriebene Doppelvokale (<code>aa</code>, <code>ee</code>, <code>oo</code>) sowie Vokale mit Dehnungs-H (<code>ah</code>, <code>eh</code>, <code>oh</code>, <code>uh</code>, <code>ih</code>) werden phonetisch zu einfachen Langvokalen zusammengefasst. Echte Diphthonge (<code>ei</code>, <code>ai</code>, <code>au</code>, <code>eu</code> / <code>äu</code>, <code>ie</code>) bleiben als eigenständige Einheiten erhalten, wobei <code>äu</code> und <code>eu</code> phonetisch als identisch behandelt werden.
             </p>
             <ul className="explanation-list">
               <li><code>Haar</code> / <code>Staat</code> &rarr; Vokal: <code>[&quot;a&quot;]</code> (passt zu &quot;Rad&quot;, &quot;Tat&quot;)</li>
               <li><code>Reh</code> / <code>Schnee</code> &rarr; Vokal: <code>[&quot;e&quot;]</code> (passt zu &quot;See&quot;)</li>
               <li><code>Stein</code> &rarr; Diphthong: <code>[&quot;ei&quot;]</code> (passt zu &quot;Mai&quot;, &quot;Seil&quot;)</li>
               <li><code>Haus</code> &rarr; Diphthong: <code>[&quot;au&quot;]</code> (passt zu &quot;Baum&quot;)</li>
+              <li><code>Bäume</code> / <code>Eule</code> &rarr; Diphthong: <code>[&quot;eu&quot;]</code> (<code>äu</code> = <code>eu</code> gleichbehandelt)</li>
             </ul>
           </section>
 
