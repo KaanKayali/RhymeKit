@@ -40,7 +40,7 @@ export default function LogicExplanationModal({ onClose }) {
           <section className="explanation-section">
             <h3>2. Doppelvokale &amp; Dehnungs-H vs. Diphthonge</h3>
             <p>
-              Geschriebene Doppelvokale (<code>aa</code>, <code>ee</code>, <code>oo</code>) sowie Vokale mit Dehnungs-H (<code>ah</code>, <code>eh</code>, <code>oh</code>, <code>uh</code>, <code>ih</code>) werden phonetisch zu einfachen Langvokalen zusammengefasst. Echte Diphthonge (<code>ei</code>, <code>ai</code>, <code>au</code>, <code>eu</code> / <code>äu</code>, <code>ie</code>) bleiben als eigenständige Einheiten erhalten, wobei <code>äu</code> und <code>eu</code> phonetisch als identisch behandelt werden.
+              Geschriebene Doppelvokale (<code>aa</code>, <code>ee</code>, <code>oo</code>) sowie Vokale mit Dehnungs-H (<code>ah</code>, <code>eh</code>, <code>oh</code>, <code>uh</code>, <code>ih</code>) werden phonetisch zu einfachen Langvokalen zusammengefasst. Echte Diphthonge (<code>ei</code>, <code>ai</code>, <code>au</code>, <code>eu</code> / <code>äu</code>, <code>ie</code>) bleiben als eigenständige Einheiten erhalten, wobei <code>äu</code> und <code>eu</code> phonetisch als identisch behandelt werden. Die Buchstabenfolge <code>io</code> wird für die Reimsuche wie <code>o</code> behandelt (z. B. <em>Radio</em> mit der Vokalfolge <code>[&quot;a&quot;, &quot;o&quot;]</code>).
             </p>
             <ul className="explanation-list">
               <li><code>Haar</code> / <code>Staat</code> &rarr; Vokal: <code>[&quot;a&quot;]</code> (passt zu &quot;Rad&quot;, &quot;Tat&quot;)</li>
