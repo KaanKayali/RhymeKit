@@ -131,6 +131,16 @@ export default function LeftPanel({
             <span>Vokal-Toleranz (e mit i/ä, u mit o)</span>
             <InfoTooltip text="Gleicht ungleiche Vokale an, die phonetisch ähnlich klingen (z. B. 'Wenden', 'Winden', 'Wänden')." />
           </label>
+          <label className="checkbox-label checkbox-suboption">
+            <input
+              type="checkbox"
+              checked={settings.strictLastSyllable}
+              disabled={!settings.vowelTolerance}
+              onChange={(e) => onSettingChange('strictLastSyllable', e.target.checked)}
+            />
+            <span>Letzte Silbe von der Vokal-Toleranz ausnehmen</span>
+            <InfoTooltip text="Die letzte Vokal-Silbe jedes Wortes muss exakt übereinstimmen; die Vokal-Toleranz bleibt für frühere Silben aktiv." />
+          </label>
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatIAsIe} onChange={(e) => onSettingChange('treatIAsIe', e.target.checked)} />
             <span>"i" = "ie" gleichbehandeln</span>

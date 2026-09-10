@@ -61,6 +61,9 @@ export default function LogicExplanationModal({ onClose }) {
                 <strong>Vokal-Toleranz (e mit i/ä, u mit o):</strong> Behandelt <code>e</code> und <code>i</code> sowie <code>e</code> und <code>ä</code> als passend, ohne <code>i</code> und <code>ä</code> direkt gleichzusetzen.
               </li>
               <li>
+                <strong>Letzte Silbe ausnehmen:</strong> Wenn die Vokal-Toleranz aktiv ist, muss die letzte Vokalsilbe jedes Wortes exakt übereinstimmen; frühere Silben bleiben tolerant.
+              </li>
+              <li>
                 <strong>i = ie gleichbehandeln:</strong> Gleicht kurzes <code>i</code> und langes <code>ie</code> an (z.&nbsp;B. <em>Lid</em> = <em>Lied</em>).
               </li>
               <li>

@@ -103,22 +103,28 @@ export function normalizeAnglicismPhonetics(word) {
   return normalizedWord
 }
 
-function vowelsAreCompatible(firstVowel, secondVowel, vowelTolerance, treatIAsIe) {
+function vowelsAreCompatible(firstVowel, secondVowel, vowelTolerance, treatIAsIe, allowTolerance = true) {
   const [firstBase, firstTag] = firstVowel.split(':')
   const [secondBase, secondTag] = secondVowel.split(':')
   if (firstTag !== secondTag) return false
   if (firstBase === secondBase) return true
   if (treatIAsIe && ((firstBase === 'i' && secondBase === 'ie') || (firstBase === 'ie' && secondBase === 'i'))) return true
-  if (!vowelTolerance) return false
+  if (!vowelTolerance || !allowTolerance) return false
 
   return (firstBase === 'e' && (secondBase === 'i' || secondBase === 'ä'))
     || (secondBase === 'e' && (firstBase === 'i' || firstBase === 'ä'))
     || ((firstBase === 'u' && secondBase === 'o') || (firstBase === 'o' && secondBase === 'u'))
 }
 
-function vowelSequencesMatch(firstSequence, secondSequence, vowelTolerance, treatIAsIe) {
+function vowelSequencesMatch(firstSequence, secondSequence, vowelTolerance, treatIAsIe, strictLastSyllable = false) {
   return firstSequence.length === secondSequence.length
-    && firstSequence.every((vowel, index) => vowelsAreCompatible(vowel, secondSequence[index], vowelTolerance, treatIAsIe))
+    && firstSequence.every((vowel, index) => vowelsAreCompatible(
+      vowel,
+      secondSequence[index],
+      vowelTolerance,
+      treatIAsIe,
+      !strictLastSyllable || index < firstSequence.length - 1,
+    ))
 }
 
 function preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms) {
@@ -141,7 +147,7 @@ function toResult(word, isCombination = false) {
  * Builds two-word results through indexed vowel partitions, avoiding a scan of
  * every possible pair. Only 100 generated combinations are retained.
  */
-function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
+function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
   if (targetVowels.length < 2) return []
 
   const wordsWithVowels = []
@@ -159,9 +165,9 @@ function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treat
     const firstTarget = targetVowels.slice(0, splitIndex)
     const secondTarget = targetVowels.slice(splitIndex)
     const firstWords = wordsWithVowels
-      .filter(({ vowels }) => vowelSequencesMatch(vowels, firstTarget, vowelTolerance, treatIAsIe))
+      .filter(({ vowels }) => vowelSequencesMatch(vowels, firstTarget, vowelTolerance, treatIAsIe, strictLastSyllable))
     const secondWords = wordsWithVowels
-      .filter(({ vowels }) => vowelSequencesMatch(vowels, secondTarget, vowelTolerance, treatIAsIe))
+      .filter(({ vowels }) => vowelSequencesMatch(vowels, secondTarget, vowelTolerance, treatIAsIe, strictLastSyllable))
 
     for (const { word: firstWord } of firstWords) {
       for (const { word: secondWord } of secondWords) {
@@ -190,6 +196,7 @@ export function findRhymes({
   wordList,
   treatErAsA = false,
   vowelTolerance = false,
+  strictLastSyllable = false,
   treatIAsIe = false,
   normalizeAnglicisms = false,
   includeCombinations = false,
@@ -224,15 +231,15 @@ export function findRhymes({
 
     switch (rhymeType) {
       case 'vowel':
-        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe)
+        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe, strictLastSyllable)
       case 'consonant':
         return inputEnding.length > 0 && inputEnding === entryEnding
       case 'vowel_ending':
-        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe) && inputEnding.length > 0 && inputEnding === entryEnding
+        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe, strictLastSyllable) && inputEnding.length > 0 && inputEnding === entryEnding
       case 'frame_vowel':
         return inputVowels.length > 0 && entryVowels.length > 0 && inputVowels.length === entryVowels.length
           && vowelsAreCompatible(inputVowels[0], entryVowels[0], vowelTolerance, treatIAsIe)
-          && vowelsAreCompatible(inputVowels.at(-1), entryVowels.at(-1), vowelTolerance, treatIAsIe)
+          && vowelsAreCompatible(inputVowels.at(-1), entryVowels.at(-1), vowelTolerance, treatIAsIe, !strictLastSyllable)
       default:
         return false
     }
@@ -242,6 +249,6 @@ export function findRhymes({
 
   return [
     ...directMatches,
-    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }),
+    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }),
   ]
 }

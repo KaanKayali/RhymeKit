@@ -2,6 +2,7 @@ const PREFERENCES_STORAGE_KEY = 'rhymekit_preferences'
 
 export const DEFAULT_SETTINGS = {
   vowelTolerance: false,
+  strictLastSyllable: false,
   additionalWords: false,
   treatErAsA: false,
   treatIAsIe: false,
@@ -41,6 +42,7 @@ export function loadPreferences() {
       sortMode: SORT_MODES.has(parsedPreferences.sortMode) ? parsedPreferences.sortMode : DEFAULT_PREFERENCES.sortMode,
       settings: {
         vowelTolerance: isBoolean(settings.vowelTolerance) ? settings.vowelTolerance : DEFAULT_SETTINGS.vowelTolerance,
+        strictLastSyllable: isBoolean(settings.strictLastSyllable) ? settings.strictLastSyllable : DEFAULT_SETTINGS.strictLastSyllable,
         additionalWords: isBoolean(settings.additionalWords) ? settings.additionalWords : DEFAULT_SETTINGS.additionalWords,
         treatErAsA: isBoolean(settings.treatErAsA) ? settings.treatErAsA : DEFAULT_SETTINGS.treatErAsA,
         treatIAsIe: isBoolean(settings.treatIAsIe) ? settings.treatIAsIe : DEFAULT_SETTINGS.treatIAsIe,
