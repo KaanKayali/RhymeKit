@@ -128,7 +128,7 @@ export default function LeftPanel({
         <div className="checkbox-group">
           <label className="checkbox-label">
             <input type="checkbox" checked={settings.vowelTolerance} onChange={(e) => onSettingChange('vowelTolerance', e.target.checked)} />
-            <span>Vokal-Toleranz (e=i=ä, u=o)</span>
+            <span>Vokal-Toleranz (e mit i/ä, u mit o)</span>
             <InfoTooltip text="Gleicht ungleiche Vokale an, die phonetisch ähnlich klingen (z. B. 'Wenden', 'Winden', 'Wänden')." />
           </label>
           <label className="checkbox-label">

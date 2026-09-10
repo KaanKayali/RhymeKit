@@ -58,7 +58,7 @@ export default function LogicExplanationModal({ onClose }) {
                 <strong>&quot;er&quot;-Endung als &quot;a&quot; Vokal:</strong> Wandelt Wortenden auf <code>-er</code> phonetisch in ein unbetontes <code>a</code> um (z.&nbsp;B. <em>Mutter</em> &rarr; <em>Mutta</em>).
               </li>
               <li>
-                <strong>Vokal-Toleranz (e=i=ä, u=o):</strong> Fasst ähnlich klingende Vokalgruppen zusammen (z.&nbsp;B. <em>Hände</em>, <em>Seelen</em>, <em>Lieder</em>).
+                <strong>Vokal-Toleranz (e mit i/ä, u mit o):</strong> Behandelt <code>e</code> und <code>i</code> sowie <code>e</code> und <code>ä</code> als passend, ohne <code>i</code> und <code>ä</code> direkt gleichzusetzen.
               </li>
               <li>
                 <strong>i = ie gleichbehandeln:</strong> Gleicht kurzes <code>i</code> und langes <code>ie</code> an (z.&nbsp;B. <em>Lid</em> = <em>Lied</em>).

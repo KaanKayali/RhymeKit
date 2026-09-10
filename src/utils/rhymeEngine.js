@@ -103,17 +103,22 @@ export function normalizeAnglicismPhonetics(word) {
   return normalizedWord
 }
 
-function normalizeVowels(vowels, vowelTolerance, treatIAsIe) {
-  return vowels.map((vowel) => {
-    const [baseVowel, tag] = vowel.split(':')
-    const suffix = tag ? `:${tag}` : ''
+function vowelsAreCompatible(firstVowel, secondVowel, vowelTolerance, treatIAsIe) {
+  const [firstBase, firstTag] = firstVowel.split(':')
+  const [secondBase, secondTag] = secondVowel.split(':')
+  if (firstTag !== secondTag) return false
+  if (firstBase === secondBase) return true
+  if (treatIAsIe && ((firstBase === 'i' && secondBase === 'ie') || (firstBase === 'ie' && secondBase === 'i'))) return true
+  if (!vowelTolerance) return false
 
-    // When both options are active, the linked groups form one equivalence set.
-    if (vowelTolerance && (baseVowel === 'e' || baseVowel === 'i' || baseVowel === 'ä' || (treatIAsIe && baseVowel === 'ie'))) return `E${suffix}`
-    if (treatIAsIe && (baseVowel === 'i' || baseVowel === 'ie')) return `I${suffix}`
-    if (vowelTolerance && (baseVowel === 'u' || baseVowel === 'o')) return `O${suffix}`
-    return vowel
-  })
+  return (firstBase === 'e' && (secondBase === 'i' || secondBase === 'ä'))
+    || (secondBase === 'e' && (firstBase === 'i' || firstBase === 'ä'))
+    || ((firstBase === 'u' && secondBase === 'o') || (firstBase === 'o' && secondBase === 'u'))
+}
+
+function vowelSequencesMatch(firstSequence, secondSequence, vowelTolerance, treatIAsIe) {
+  return firstSequence.length === secondSequence.length
+    && firstSequence.every((vowel, index) => vowelsAreCompatible(vowel, secondSequence[index], vowelTolerance, treatIAsIe))
 }
 
 function preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms) {
@@ -125,7 +130,7 @@ function preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms) {
 
 function vowelKey(word, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength) {
   const phoneticWord = preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms)
-  return normalizeVowels(extractVowelSequence(phoneticWord, distinguishVowelLength), vowelTolerance, treatIAsIe)
+  return extractVowelSequence(phoneticWord, distinguishVowelLength)
 }
 
 function toResult(word, isCombination = false) {
@@ -139,26 +144,27 @@ function toResult(word, isCombination = false) {
 function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
   if (targetVowels.length < 2) return []
 
-  const wordsByVowelKey = new Map()
+  const wordsWithVowels = []
   for (const entry of uniqueWordList) {
     const word = String(entry).trim()
     if (/\s/.test(word)) continue
 
-    const key = vowelKey(word.toLowerCase(), language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength).join('-')
-    if (!key) continue
-    const matches = wordsByVowelKey.get(key) || []
-    matches.push(word)
-    wordsByVowelKey.set(key, matches)
+    const vowels = vowelKey(word.toLowerCase(), language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
+    if (vowels.length) wordsWithVowels.push({ word, vowels })
   }
 
   const combinations = []
   const seenCombinations = new Set()
   for (let splitIndex = 1; splitIndex < targetVowels.length && combinations.length < MAX_COMBINATION_RESULTS; splitIndex += 1) {
-    const firstWords = wordsByVowelKey.get(targetVowels.slice(0, splitIndex).join('-')) || []
-    const secondWords = wordsByVowelKey.get(targetVowels.slice(splitIndex).join('-')) || []
+    const firstTarget = targetVowels.slice(0, splitIndex)
+    const secondTarget = targetVowels.slice(splitIndex)
+    const firstWords = wordsWithVowels
+      .filter(({ vowels }) => vowelSequencesMatch(vowels, firstTarget, vowelTolerance, treatIAsIe))
+    const secondWords = wordsWithVowels
+      .filter(({ vowels }) => vowelSequencesMatch(vowels, secondTarget, vowelTolerance, treatIAsIe))
 
-    for (const firstWord of firstWords) {
-      for (const secondWord of secondWords) {
+    for (const { word: firstWord } of firstWords) {
+      for (const { word: secondWord } of secondWords) {
         const combination = `${firstWord} ${secondWord}`
         const comparisonKey = combination.toLowerCase()
         if (!seenCombinations.has(comparisonKey)) {
@@ -205,8 +211,7 @@ export function findRhymes({
   if (!cleanInput) return uniqueWordList.map((entry) => toResult(entry))
 
   const phoneticInput = preparePhoneticWord(cleanInput, language, treatErAsA, normalizeAnglicisms)
-  const inputVowels = normalizeVowels(extractVowelSequence(phoneticInput, distinguishVowelLength), vowelTolerance, treatIAsIe)
-  const inputVowelKey = inputVowels.join('-')
+  const inputVowels = extractVowelSequence(phoneticInput, distinguishVowelLength)
   const inputEnding = extractEndingFromLastVowel(phoneticInput)
 
   const directMatches = uniqueWordList.filter((entry) => {
@@ -214,19 +219,20 @@ export function findRhymes({
     if (cleanEntry === cleanInput) return false
 
     const phoneticEntry = preparePhoneticWord(cleanEntry, language, treatErAsA, normalizeAnglicisms)
-    const entryVowels = normalizeVowels(extractVowelSequence(phoneticEntry, distinguishVowelLength), vowelTolerance, treatIAsIe)
-    const entryVowelKey = entryVowels.join('-')
+    const entryVowels = extractVowelSequence(phoneticEntry, distinguishVowelLength)
     const entryEnding = extractEndingFromLastVowel(phoneticEntry)
 
     switch (rhymeType) {
       case 'vowel':
-        return inputVowelKey.length > 0 && inputVowelKey === entryVowelKey
+        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe)
       case 'consonant':
         return inputEnding.length > 0 && inputEnding === entryEnding
       case 'vowel_ending':
-        return inputVowelKey.length > 0 && inputVowelKey === entryVowelKey && inputEnding.length > 0 && inputEnding === entryEnding
+        return inputVowels.length > 0 && vowelSequencesMatch(inputVowels, entryVowels, vowelTolerance, treatIAsIe) && inputEnding.length > 0 && inputEnding === entryEnding
       case 'frame_vowel':
-        return inputVowels.length > 0 && entryVowels.length > 0 && inputVowels.length === entryVowels.length && inputVowels[0] === entryVowels[0] && inputVowels.at(-1) === entryVowels.at(-1)
+        return inputVowels.length > 0 && entryVowels.length > 0 && inputVowels.length === entryVowels.length
+          && vowelsAreCompatible(inputVowels[0], entryVowels[0], vowelTolerance, treatIAsIe)
+          && vowelsAreCompatible(inputVowels.at(-1), entryVowels.at(-1), vowelTolerance, treatIAsIe)
       default:
         return false
     }
