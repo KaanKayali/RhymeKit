@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
+import FooterPresetSection from './components/FooterPresetSection'
 import LeftPanel from './components/LeftPanel'
 import LogicExplanationModal from './components/LogicExplanationModal'
 import RightPanel from './components/RightPanel'
@@ -110,6 +111,7 @@ export default function App() {
           onSortModeChange={setSortMode}
         />
       </div>
+      <FooterPresetSection />
 
       {showExplanationModal && (
         <LogicExplanationModal onClose={() => setShowExplanationModal(false)} />

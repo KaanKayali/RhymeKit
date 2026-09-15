@@ -20,7 +20,9 @@ button { cursor: pointer; }
 .app-shell { max-width: 1060px; margin: 0 auto; padding: 42px 24px; }
 
 .app-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
-.header-left { display: flex; align-items: baseline; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.brand-logo { width: 36px; height: 36px; margin-right: 0; border-radius: 8px; object-fit: cover; }
+.brand-copy { display: flex; align-items: baseline; gap: 12px; }
 .app-header h1 { margin: 0; color: #2563eb; font-size: 28px; font-weight: 700; line-height: 1.2; }
 .header-meta { display: flex; gap: 10px; color: #6b7280; font-size: 12px; font-weight: 400; }
 .header-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; }
@@ -30,6 +32,14 @@ button { cursor: pointer; }
 .help-icon { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 999px; background: #2563eb; color: #fff; font-size: 11px; font-weight: 700; }
 
 .workspace { display: grid; grid-template-columns: minmax(270px, 0.9fr) minmax(340px, 1.4fr); align-items: start; gap: 12px; }
+.preset-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; padding: 16px; }
+.preset-footer-copy { min-width: 0; }
+.preset-footer h2 { margin: 0 0 6px; color: #1e3a8a; font-size: 17px; }
+.preset-footer p { margin: 0; color: #475569; font-size: 13px; line-height: 1.5; }
+.preset-footer code { color: #1d4ed8; font-family: inherit; font-weight: 700; }
+.preset-download-button { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border: 2px solid #2563eb; border-radius: 8px; background: #fff; color: #2563eb; padding: 8px 12px; font-weight: 700; text-align: center; text-decoration: none; transition: background-color .15s, color .15s, transform .15s; }
+.preset-download-button:hover { background: #eff6ff; transform: translateY(-1px); }
+.preset-download-button span:first-child { font-size: 20px; line-height: 1; }
 .panel { border: 2px solid #2563eb; border-radius: 13px; background: #fff; box-shadow: 0 6px 18px rgb(37 99 235 / 8%); }
 
 .controls-panel { padding: 24px; }
@@ -144,6 +154,9 @@ button { cursor: pointer; }
 @media (max-width: 720px) {
   .app-shell { padding: 28px 16px; }
   .app-header { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .brand-copy { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .preset-footer { align-items: stretch; flex-direction: column; gap: 14px; }
+  .preset-download-button { width: 100%; }
   .workspace { grid-template-columns: 1fr; }
   .panel { min-height: auto; }
   .results-heading { align-items: flex-start; flex-direction: column; }

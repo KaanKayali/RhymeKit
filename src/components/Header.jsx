@@ -4,10 +4,13 @@ export default function Header({ onOpenExplanation }) {
   return (
     <header className="app-header">
       <div className="header-left">
-        <h1>RhymeKit</h1>
-        <div className="header-meta">
-          <span>Von @KaanKayali</span>
-          <span>{APP_VERSION}</span>
+        <img className="brand-logo" src="/assets/Rhymekit512x512.png" alt="RhymeKit Logo" />
+        <div className="brand-copy">
+          <h1>RhymeKit</h1>
+          <div className="header-meta">
+            <span>Von @KaanKayali</span>
+            <span>{APP_VERSION}</span>
+          </div>
         </div>
       </div>
 
