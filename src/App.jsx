@@ -56,11 +56,12 @@ export default function App() {
       vowelTolerance: settings.vowelTolerance,
       strictLastSyllable: settings.strictLastSyllable,
       treatIAsIe: settings.treatIAsIe,
+      normalizeUmlauts: settings.normalizeUmlauts,
       normalizeAnglicisms: settings.normalizeAnglicisms,
       includeCombinations: settings.additionalWords,
       distinguishVowelLength: settings.distinguishVowelLength,
     }),
-    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA, settings.vowelTolerance, settings.strictLastSyllable, settings.treatIAsIe, settings.normalizeAnglicisms, settings.additionalWords, settings.distinguishVowelLength],
+    [debouncedSearchTerm, rhymeType, language, wordList, settings.treatErAsA, settings.vowelTolerance, settings.strictLastSyllable, settings.treatIAsIe, settings.normalizeUmlauts, settings.normalizeAnglicisms, settings.additionalWords, settings.distinguishVowelLength],
   )
 
   useLayoutEffect(() => {

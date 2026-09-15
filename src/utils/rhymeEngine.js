@@ -127,15 +127,18 @@ function vowelSequencesMatch(firstSequence, secondSequence, vowelTolerance, trea
     ))
 }
 
-function preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms) {
+function preparePhoneticWord(word, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms) {
   const withAnglicismsNormalized = language === 'de' && normalizeAnglicisms
     ? normalizeAnglicismPhonetics(word)
     : word
-  return applyGermanErRule(withAnglicismsNormalized, language, treatErAsA)
+  const withUmlautsNormalized = language === 'de' && normalizeUmlauts
+    ? withAnglicismsNormalized.replace(/ö/g, 'o').replace(/ü/g, 'u')
+    : withAnglicismsNormalized
+  return applyGermanErRule(withUmlautsNormalized, language, treatErAsA)
 }
 
-function vowelKey(word, language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength) {
-  const phoneticWord = preparePhoneticWord(word, language, treatErAsA, normalizeAnglicisms)
+function vowelKey(word, language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength) {
+  const phoneticWord = preparePhoneticWord(word, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
   return extractVowelSequence(phoneticWord, distinguishVowelLength)
 }
 
@@ -147,7 +150,7 @@ function toResult(word, isCombination = false) {
  * Builds two-word results through indexed vowel partitions, avoiding a scan of
  * every possible pair. Only 100 generated combinations are retained.
  */
-function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
+function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treatErAsA, normalizeUmlauts, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }) {
   if (targetVowels.length < 2) return []
 
   const wordsWithVowels = []
@@ -155,7 +158,7 @@ function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treat
     const word = String(entry).trim()
     if (/\s/.test(word)) continue
 
-    const vowels = vowelKey(word.toLowerCase(), language, treatErAsA, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
+    const vowels = vowelKey(word.toLowerCase(), language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
     if (vowels.length) wordsWithVowels.push({ word, vowels })
   }
 
@@ -195,6 +198,7 @@ export function findRhymes({
   language,
   wordList,
   treatErAsA = false,
+  normalizeUmlauts = false,
   vowelTolerance = false,
   strictLastSyllable = false,
   treatIAsIe = false,
@@ -217,7 +221,7 @@ export function findRhymes({
   const cleanInput = String(searchTerm || '').trim().toLowerCase()
   if (!cleanInput) return uniqueWordList.map((entry) => toResult(entry))
 
-  const phoneticInput = preparePhoneticWord(cleanInput, language, treatErAsA, normalizeAnglicisms)
+  const phoneticInput = preparePhoneticWord(cleanInput, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
   const inputVowels = extractVowelSequence(phoneticInput, distinguishVowelLength)
   const inputEnding = extractEndingFromLastVowel(phoneticInput)
 
@@ -225,7 +229,7 @@ export function findRhymes({
     const cleanEntry = entry.toLowerCase()
     if (cleanEntry === cleanInput) return false
 
-    const phoneticEntry = preparePhoneticWord(cleanEntry, language, treatErAsA, normalizeAnglicisms)
+    const phoneticEntry = preparePhoneticWord(cleanEntry, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
     const entryVowels = extractVowelSequence(phoneticEntry, distinguishVowelLength)
     const entryEnding = extractEndingFromLastVowel(phoneticEntry)
 
@@ -249,6 +253,6 @@ export function findRhymes({
 
   return [
     ...directMatches,
-    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }),
+    ...findTwoWordCombinations({ uniqueWordList, targetVowels: inputVowels, language, treatErAsA, normalizeUmlauts, vowelTolerance, strictLastSyllable, treatIAsIe, normalizeAnglicisms, distinguishVowelLength }),
   ]
 }

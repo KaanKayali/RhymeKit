@@ -147,6 +147,11 @@ export default function LeftPanel({
             <InfoTooltip text="Behandelt kurzes 'i' und langes 'ie' als identischen Vokal (z. B. 'Lid' = 'Lied')." />
           </label>
           <label className="checkbox-label">
+            <input type="checkbox" checked={settings.normalizeUmlauts} onChange={(e) => onSettingChange('normalizeUmlauts', e.target.checked)} />
+            <span>"ö" = "o" und "ü" = "u" gleichbehandeln</span>
+            <InfoTooltip text="Behandelt 'ö' wie 'o' und 'ü' wie 'u', sodass Wörter mit diesen Umlauten als gleichklingende Reime erkannt werden (z. B. 'schön' = 'schon', 'fühlen' = 'fuhlen')." />
+          </label>
+          <label className="checkbox-label">
             <input type="checkbox" checked={settings.treatErAsA} onChange={(e) => onSettingChange('treatErAsA', e.target.checked)} />
             <span>"er"-Endung als "a" Vokal behandeln</span>
             <InfoTooltip text="Behandelt auslautendes '-er' phonetisch als 'a' (z. B. 'Mutter' klingt wie 'Mutta')." />
@@ -213,8 +218,8 @@ export default function LeftPanel({
           <button
             className="button button-outline"
             type="button"
-            disabled={selectedWords.length === 0 || settings.additionalWords}
-            title={settings.additionalWords ? 'Die Auswahl kann während der Wort-Kombinationssuche nicht gelöscht werden.' : undefined}
+            disabled={selectedWords.length === 0}
+            title={selectedWords.length === 0 ? 'Wähle zuerst Wörter aus, die gelöscht werden sollen.' : 'Löscht die ausgewählten Wörter aus der Wortliste.'}
             onClick={() => onDeleteSelection(selectedWords)}
           >
             Auswahl löschen

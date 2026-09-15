@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS = {
   additionalWords: false,
   treatErAsA: false,
   treatIAsIe: false,
+  normalizeUmlauts: false,
   normalizeAnglicisms: false,
   distinguishVowelLength: false,
 }
@@ -46,6 +47,7 @@ export function loadPreferences() {
         additionalWords: isBoolean(settings.additionalWords) ? settings.additionalWords : DEFAULT_SETTINGS.additionalWords,
         treatErAsA: isBoolean(settings.treatErAsA) ? settings.treatErAsA : DEFAULT_SETTINGS.treatErAsA,
         treatIAsIe: isBoolean(settings.treatIAsIe) ? settings.treatIAsIe : DEFAULT_SETTINGS.treatIAsIe,
+        normalizeUmlauts: isBoolean(settings.normalizeUmlauts) ? settings.normalizeUmlauts : DEFAULT_SETTINGS.normalizeUmlauts,
         normalizeAnglicisms: isBoolean(settings.normalizeAnglicisms) ? settings.normalizeAnglicisms : DEFAULT_SETTINGS.normalizeAnglicisms,
         distinguishVowelLength: isBoolean(settings.distinguishVowelLength) ? settings.distinguishVowelLength : DEFAULT_SETTINGS.distinguishVowelLength,
       },

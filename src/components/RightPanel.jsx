@@ -165,7 +165,17 @@ export default function RightPanel({
             ))}
           </ul>
         ) : (
-          <p className="empty-state">{isRhymeSearchActive ? 'Keine passenden Einträge gefunden.' : 'Deine Wortliste ist noch leer.'}</p>
+          <p className="empty-state">
+            {isRhymeSearchActive
+              ? <>
+                Keine passenden Einträge gefunden. Füge weitere Wörter aus Dateien hinzu, damit RhymeKit mehr Reime finden kann.
+                <br /><br />
+                Falls du denkst du hast genug Wörter, dann probiere 
+                <br />
+                die Funktion "Wort-Kombinationen" aus.
+              </>
+              : 'Deine Wortliste ist noch leer. Füge Wörter aus Dateien hinzu, damit RhymeKit Reime anzeigen kann. Je mehr Wörter du hinzufügst, desto besser werden die Ergebnisse.'}
+          </p>
         )}
       </div>
       <p className="entry-count">{headerLabel}</p>
