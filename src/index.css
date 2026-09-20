@@ -46,6 +46,16 @@ button { cursor: pointer; }
 .preset-download-english { border-color: #0f766e; color: #0f766e; }
 .preset-download-english:hover { background: #f0fdfa; }
 .preset-download-button span:first-child { font-size: 20px; line-height: 1; }
+.legal-links { display: flex; align-items: center; justify-content: center; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+.legal-links button { border: 0; background: transparent; color: #64748b; padding: 0; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
+.legal-links button:hover { color: #1e3a8a; }
+.legal-links span { color: #94a3b8; font-size: 11px; }
+.legal-modal { width: min(100%, 460px); border: 2px solid #2563eb; border-radius: 13px; background: #fff; box-shadow: 0 18px 45px rgb(30 64 175 / 28%); overflow: hidden; }
+.legal-modal-body { padding: 20px 24px; color: #374151; font-size: 14px; line-height: 1.5; }
+.legal-modal-body p { margin: 0; }
+.legal-details { display: grid; grid-template-columns: 90px 1fr; gap: 10px 14px; margin: 0; }
+.legal-details dt { color: #1d4ed8; font-weight: 700; }
+.legal-details dd { margin: 0; }
 .panel { border: 2px solid #2563eb; border-radius: 13px; background: #fff; box-shadow: 0 6px 18px rgb(37 99 235 / 8%); }
 
 .controls-panel { padding: 24px; }

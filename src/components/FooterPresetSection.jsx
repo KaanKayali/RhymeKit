@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 const PRESETS = [
   {
     title: 'Start-Paket: Deutsche Wörter-Liste',
@@ -18,6 +20,18 @@ const PRESETS = [
 ]
 
 export default function FooterPresetSection() {
+  const [activeLegalPage, setActiveLegalPage] = useState(null)
+
+  useEffect(() => {
+    if (!activeLegalPage) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setActiveLegalPage(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeLegalPage])
+
   return (
     <section className="preset-footer" aria-labelledby="preset-footer-title">
       <div className="preset-footer-intro">
@@ -40,6 +54,50 @@ export default function FooterPresetSection() {
           </article>
         ))}
       </div>
+      <nav className="legal-links" aria-label="Rechtliche Informationen">
+        <button type="button" onClick={() => setActiveLegalPage('imprint')}>Impressum</button>
+        <span aria-hidden="true">|</span>
+        <button type="button" onClick={() => setActiveLegalPage('privacy')}>Datenschutz</button>
+      </nav>
+
+      {activeLegalPage && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setActiveLegalPage(null)
+        }}>
+          <section
+            className="legal-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="legal-modal-title"
+          >
+            <div className="explanation-header">
+              <h2 id="legal-modal-title">{activeLegalPage === 'imprint' ? 'Impressum' : 'Datenschutz'}</h2>
+              <button
+                type="button"
+                className="close-modal-button"
+                onClick={() => setActiveLegalPage(null)}
+                aria-label="Schließen"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="legal-modal-body">
+              {activeLegalPage === 'imprint' ? (
+                <dl className="legal-details">
+                  <dt>Name</dt>
+                  <dd>Kaan Kayali</dd>
+                  <dt>Adresse</dt>
+                  <dd>*****</dd>
+                  <dt>E-Mail</dt>
+                  <dd>20kaan05@gmail.com</dd>
+                </dl>
+              ) : (
+                <p>Alle Daten bleiben zu 100 % lokal in deinem Browser und werden nicht an externe Server übertragen.</p>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   )
 }
