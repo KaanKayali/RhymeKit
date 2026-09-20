@@ -1,3 +1,7 @@
+import { ENGLISH_LOANWORDS } from './englishLoanwords.js'
+
+export { ENGLISH_LOANWORDS } from './englishLoanwords.js'
+
 // Replace or expand this small starter list with your own dictionary data.
 export const DEFAULT_WORD_LIST = ['Haus', 'Maus', 'Laus', 'Blau', 'Schlau']
 
@@ -13,15 +17,15 @@ export function extractVowelSequence(word, distinguishVowelLength = false) {
 
   if (!distinguishVowelLength) {
     // 1. Collapse double vowels (geminates) and stretching H to single vowel representation
-    clean = clean.replace(/aa/g, 'a')
-    clean = clean.replace(/ee/g, 'e')
-    clean = clean.replace(/oo/g, 'o')
+    clean = clean.replace(/aa/g, 'a|')
+    clean = clean.replace(/ee/g, 'e|')
+    clean = clean.replace(/oo/g, 'o|')
 
-    clean = clean.replace(/ah/g, 'a')
-    clean = clean.replace(/eh/g, 'e')
-    clean = clean.replace(/oh/g, 'o')
-    clean = clean.replace(/uh/g, 'u')
-    clean = clean.replace(/ih/g, 'i')
+    clean = clean.replace(/ah/g, 'a|')
+    clean = clean.replace(/eh/g, 'e|')
+    clean = clean.replace(/oh/g, 'o|')
+    clean = clean.replace(/uh/g, 'u|')
+    clean = clean.replace(/ih/g, 'i|')
 
     // 2. Extract true diphthongs and remaining single vowels in exact order
     const matches = clean.match(VOWEL_REGEX)
@@ -72,19 +76,19 @@ export function extractEndingFromLastVowel(word) {
   let cleanWord = String(word).toLowerCase()
   cleanWord = cleanWord.replace(/äu/g, 'eu')
   cleanWord = cleanWord.replace(/io/g, 'o')
-  cleanWord = cleanWord.replace(/aa/g, 'a')
-  cleanWord = cleanWord.replace(/ee/g, 'e')
-  cleanWord = cleanWord.replace(/oo/g, 'o')
+  cleanWord = cleanWord.replace(/aa/g, 'a|')
+  cleanWord = cleanWord.replace(/ee/g, 'e|')
+  cleanWord = cleanWord.replace(/oo/g, 'o|')
 
-  cleanWord = cleanWord.replace(/ah/g, 'a')
-  cleanWord = cleanWord.replace(/eh/g, 'e')
-  cleanWord = cleanWord.replace(/oh/g, 'o')
-  cleanWord = cleanWord.replace(/uh/g, 'u')
-  cleanWord = cleanWord.replace(/ih/g, 'i')
+  cleanWord = cleanWord.replace(/ah/g, 'a|')
+  cleanWord = cleanWord.replace(/eh/g, 'e|')
+  cleanWord = cleanWord.replace(/oh/g, 'o|')
+  cleanWord = cleanWord.replace(/uh/g, 'u|')
+  cleanWord = cleanWord.replace(/ih/g, 'i|')
 
   const vowelMatches = [...cleanWord.matchAll(VOWEL_REGEX)]
   const lastVowel = vowelMatches.at(-1)
-  return lastVowel?.index === undefined ? '' : cleanWord.slice(lastVowel.index)
+  return lastVowel?.index === undefined ? '' : cleanWord.slice(lastVowel.index).replace(/\|/g, '')
 }
 
 function applyGermanErRule(word, language, treatErAsA) {
@@ -101,6 +105,41 @@ export function normalizeAnglicismPhonetics(word) {
   normalizedWord = normalizedWord.replace(/igh/g, 'ei')
   normalizedWord = normalizedWord.replace(/y(?=$|[^aeiouäöü])/g, 'ei')
   return normalizedWord
+}
+
+function getEnglishLoanwordStems(word) {
+  const cleanWord = String(word || '').toLowerCase().trim()
+  if (cleanWord.length < 4) return [cleanWord]
+
+  const stems = [cleanWord]
+  let currentStem = cleanWord
+  const suffixes = ['s', 'ing', 'ers', 'er', 'ed', 'es']
+  while (currentStem.length >= 4) {
+    const suffix = suffixes.find((candidate) => currentStem.endsWith(candidate))
+    const nextStem = suffix ? currentStem.slice(0, -suffix.length) : currentStem
+    if (nextStem === currentStem) break
+    stems.push(nextStem)
+    currentStem = nextStem
+  }
+  return stems
+}
+
+export function lookupEnglishLoanword(word) {
+  const cleanWord = String(word || '').toLowerCase().trim()
+  if (ENGLISH_LOANWORDS[cleanWord]) return ENGLISH_LOANWORDS[cleanWord]
+
+  for (const stem of getEnglishLoanwordStems(cleanWord).slice(1)) {
+    if (ENGLISH_LOANWORDS[stem]) return ENGLISH_LOANWORDS[stem]
+  }
+
+  return undefined
+}
+
+export function extractVowelsWithAnglicisms(word, distinguishVowelLength = false) {
+  const dictionaryVowels = lookupEnglishLoanword(word)
+  if (dictionaryVowels) return [...dictionaryVowels]
+
+  return extractVowelSequence(normalizeAnglicismPhonetics(word), distinguishVowelLength)
 }
 
 function vowelsAreCompatible(firstVowel, secondVowel, vowelTolerance, treatIAsIe, allowTolerance = true) {
@@ -138,6 +177,10 @@ function preparePhoneticWord(word, language, treatErAsA, normalizeUmlauts, norma
 }
 
 function vowelKey(word, language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength) {
+  if (language === 'de' && normalizeAnglicisms) {
+    return extractVowelsWithAnglicisms(word, distinguishVowelLength)
+  }
+
   const phoneticWord = preparePhoneticWord(word, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
   return extractVowelSequence(phoneticWord, distinguishVowelLength)
 }
@@ -158,7 +201,7 @@ function findTwoWordCombinations({ uniqueWordList, targetVowels, language, treat
     const word = String(entry).trim()
     if (/\s/.test(word)) continue
 
-    const vowels = vowelKey(word.toLowerCase(), language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
+    const vowels = vowelKey(word, language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
     if (vowels.length) wordsWithVowels.push({ word, vowels })
   }
 
@@ -222,7 +265,7 @@ export function findRhymes({
   if (!cleanInput) return uniqueWordList.map((entry) => toResult(entry))
 
   const phoneticInput = preparePhoneticWord(cleanInput, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
-  const inputVowels = extractVowelSequence(phoneticInput, distinguishVowelLength)
+  const inputVowels = vowelKey(cleanInput, language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
   const inputEnding = extractEndingFromLastVowel(phoneticInput)
 
   const directMatches = uniqueWordList.filter((entry) => {
@@ -230,7 +273,7 @@ export function findRhymes({
     if (cleanEntry === cleanInput) return false
 
     const phoneticEntry = preparePhoneticWord(cleanEntry, language, treatErAsA, normalizeUmlauts, normalizeAnglicisms)
-    const entryVowels = extractVowelSequence(phoneticEntry, distinguishVowelLength)
+    const entryVowels = vowelKey(cleanEntry, language, treatErAsA, normalizeUmlauts, vowelTolerance, treatIAsIe, normalizeAnglicisms, distinguishVowelLength)
     const entryEnding = extractEndingFromLastVowel(phoneticEntry)
 
     switch (rhymeType) {
