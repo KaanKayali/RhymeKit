@@ -17,7 +17,7 @@ export const DELIMITER_LIST = [
 
 export default function ImportOptionsModal({ onCancel, onConfirm }) {
   const [selectedDelimiters, setSelectedDelimiters] = useState(() => (
-    DELIMITER_LIST.filter((item) => item.defaultChecked).map((item) => item.id)
+    DELIMITER_LIST.map((item) => item.id)
   ))
 
   useEffect(() => {
