@@ -1,18 +1,45 @@
-const PRESET_PATH = '/presets/Deutsche_Woerter_Preset_280.txt'
+const PRESETS = [
+  {
+    title: 'Start-Paket: Deutsche Wörter-Liste',
+    description: 'Ein umfangreiches deutsches Paket mit 737 häufigen Wörtern aus den Bereichen Menschen, Alltag, Natur, Gesellschaft, Körper, Verben, Eigenschaften und Verbindungswörter.',
+    path: '/presets/Deutsche_Woerter_Preset_1000.txt',
+    filename: 'Deutsche_Woerter_Preset_1000.txt',
+    label: 'Deutsches Preset herunterladen',
+    className: 'preset-download-button preset-download-german',
+  },
+  {
+    title: 'English Starter Pack',
+    description: 'A complete English companion preset with a broad vocabulary for rhyme experiments, covering people, everyday life, nature, society, body, verbs, adjectives and connecting words.',
+    path: '/presets/English_Words_Preset_1000.txt',
+    filename: 'English_Words_Preset_1000.txt',
+    label: 'Englisches Preset herunterladen',
+    className: 'preset-download-button preset-download-english',
+  },
+]
 
 export default function FooterPresetSection() {
   return (
     <section className="preset-footer" aria-labelledby="preset-footer-title">
-      <div className="preset-footer-copy">
-        <h2 id="preset-footer-title">Start-Paket: Deutsche Wörter-Liste</h2>
+      <div className="preset-footer-intro">
+        <h2 id="preset-footer-title">Wortlisten zum Ausprobieren</h2>
         <p>
-          Neu bei RhymeKit? Lade das vorgefertigte Paket mit 280 häufigen deutschen Wörtern (Nomen, Verben, Adjektive, Konjunktionen, Präpositionen) als <code>.txt</code>-Datei herunter. Lade die Datei anschliessend oben links über <strong>&apos;Liste hinzufügen&apos;</strong> hoch, um das Tool direkt auszuprobieren und den Umgang mit eigenen Wortlisten zu lernen.
+          Neu bei RhymeKit? Lade ein vorgefertigtes Paket als <code>.txt</code>-Datei herunter und importiere es oben links über <strong>&apos;Liste hinzufügen&apos;</strong>.
         </p>
       </div>
-      <a className="preset-download-button" href={PRESET_PATH} download="Deutsche_Woerter_Preset_280.txt">
-        <span aria-hidden="true">↓</span>
-        <span>Preset herunterladen (280 Wörter .txt)</span>
-      </a>
+      <div className="preset-options">
+        {PRESETS.map((preset) => (
+          <article className="preset-option" key={preset.path}>
+            <div className="preset-footer-copy">
+              <h3>{preset.title}</h3>
+              <p>{preset.description}</p>
+            </div>
+            <a className={preset.className} href={preset.path} download={preset.filename}>
+              <span aria-hidden="true">↓</span>
+              <span>{preset.label}</span>
+            </a>
+          </article>
+        ))}
+      </div>
     </section>
   )
 }
