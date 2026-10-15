@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code
+        uses: actions/checkout@v4
+
+      - name: Node.js setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Imports
+        run: npm ci
+
+      - name: Build run
+        run: npm run build
+
+      - name: Pages configure
+        uses: actions/configure-pages@v5
+
+      - name: Build-Artefakt
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: GitHub Pages deployen
+        id: deployment
+        uses: actions/deploy-pages@v4

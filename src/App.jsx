@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import FooterPresetSection from './components/FooterPresetSection'
 import LeftPanel from './components/LeftPanel'
 import LogicExplanationModal from './components/LogicExplanationModal'
@@ -112,6 +113,7 @@ export default function App() {
         />
       </div>
       <FooterPresetSection />
+      <Footer />
 
       {showExplanationModal && (
         <LogicExplanationModal onClose={() => setShowExplanationModal(false)} />

@@ -4,7 +4,7 @@ export default function Header({ onOpenExplanation }) {
   return (
     <header className="app-header">
       <div className="header-left">
-        <img className="brand-logo" src="/assets/Rhymekit512x512.png" alt="RhymeKit Logo" />
+        <img className="brand-logo" src={`${import.meta.env.BASE_URL}assets/Rhymekit512x512.png`} alt="RhymeKit Logo" />
         <div className="brand-copy">
           <h1>RhymeKit</h1>
           <div className="header-meta">

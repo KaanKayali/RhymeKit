@@ -2,7 +2,7 @@ const PRESETS = [
   {
     title: 'Start-Paket: Deutsche Wörter-Liste',
     description: 'Ein umfangreiches deutsches Paket mit 737 häufigen Wörtern aus den Bereichen Menschen, Alltag, Natur, Gesellschaft, Körper, Verben, Eigenschaften und Verbindungswörter.',
-    path: '/presets/Deutsche_Woerter_Preset_1000.txt',
+    path: 'presets/Deutsche_Woerter_Preset_1000.txt',
     filename: 'Deutsche_Woerter_Preset_1000.txt',
     label: 'Deutsches Preset herunterladen',
     className: 'preset-download-button preset-download-german',
@@ -10,7 +10,7 @@ const PRESETS = [
   {
     title: 'English Starter Pack',
     description: 'A complete English companion preset with a broad vocabulary for rhyme experiments, covering people, everyday life, nature, society, body, verbs, adjectives and connecting words.',
-    path: '/presets/English_Words_Preset_1000.txt',
+    path: 'presets/English_Words_Preset_1000.txt',
     filename: 'English_Words_Preset_1000.txt',
     label: 'Englisches Preset herunterladen',
     className: 'preset-download-button preset-download-english',
@@ -33,7 +33,7 @@ export default function FooterPresetSection() {
               <h3>{preset.title}</h3>
               <p>{preset.description}</p>
             </div>
-            <a className={preset.className} href={preset.path} download={preset.filename}>
+            <a className={preset.className} href={`${import.meta.env.BASE_URL}${preset.path}`} download={preset.filename}>
               <span aria-hidden="true">↓</span>
               <span>{preset.label}</span>
             </a>
