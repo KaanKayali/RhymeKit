@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.0'
+const APP_VERSION = 'v1.0.1'
 
 export default function Header({ onOpenExplanation }) {
   return (
